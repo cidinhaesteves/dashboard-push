@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Push Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="wrapper">
+
+    <!-- PAINEL -->
+    <div class="container">
+      <h1>🚀 Push Dashboard</h1>
+
+      <label>Título</label>
+      <input type="text" id="titulo" maxlength="30" />
+      <div class="contador" id="contTitulo">0 / 30</div>
+
+      <label>Mensagem</label>
+      <textarea id="mensagem" maxlength="120"></textarea>
+      <div class="contador" id="contMensagem">0 / 120</div>
+
+      <button id="btnEnviar">Enviar Push</button>
+
+      <div id="status"></div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="preview">
+      <h2>📱 Preview</h2>
+
+      <div class="notificacao">
+        <div class="titulo-preview" id="previewTitulo">Título</div>
+        <div class="msg-preview" id="previewMensagem">Mensagem...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

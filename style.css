@@ -1,0 +1,108 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+  margin: 0;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  gap: 40px;
+}
+
+.container {
+  background: #1e293b;
+  padding: 30px;
+  border-radius: 16px;
+  width: 320px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+.preview {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 16px;
+  width: 260px;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+label {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: none;
+  background: #334155;
+  color: white;
+}
+
+textarea {
+  height: 90px;
+  resize: none;
+}
+
+.contador {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: right;
+  margin-bottom: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #22c55e;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+#status {
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* ========================= */
+/* 🔥 PREVIEW FINAL */
+/* ========================= */
+
+.notificacao {
+  background: #334155;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 15px;
+  width: 100%;
+  max-width: 220px;
+}
+
+/* TÍTULO */
+.titulo-preview {
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 4px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* MENSAGEM (AGORA MOSTRA TUDO) */
+.msg-preview {
+  font-size: 12px;
+  color: #cbd5f5;
+
+  white-space: pre-wrap;      /* 🔥 mantém quebra de linha */
+  word-break: break-word;     /* 🔥 quebra palavras grandes */
+}
