@@ -36,6 +36,8 @@ body {
   border-radius: 12px;
 }
 
+.hidden { display: none; }
+
 input, textarea {
   width: 100%;
   padding: 10px;
@@ -56,6 +58,7 @@ button {
 
 .send { background: #22c55e; }
 .logout { background: #ef4444; }
+.historyBtn { background: #3b82f6; }
 
 .counter {
   font-size: 12px;
@@ -63,20 +66,17 @@ button {
   opacity: 0.7;
 }
 
-/* PREVIEW */
 .notification {
   background: #1e293b;
   padding: 10px;
   border-radius: 8px;
 }
 
-.title {
-  font-weight: bold;
-}
-
-.body {
-  font-size: 13px;
-  opacity: 0.8;
+.historyBox {
+  margin-top: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 12px;
 }
 </style>
 </head>
@@ -106,27 +106,37 @@ button {
   <div class="counter" id="msgCount">0 / 120</div>
 
   <button class="send" onclick="sendPush()">Enviar Push</button>
+  <button class="historyBtn" onclick="toggleHistory()">📊 Histórico</button>
   <button class="logout" onclick="logout()">Sair</button>
 
   <div id="pushStatus"></div>
 
+  <!-- HISTÓRICO -->
+  <div id="historySection" class="hidden">
+    <h4>📊 Estatísticas</h4>
+    <div id="stats"></div>
+
+    <h4>📨 Últimos envios</h4>
+    <div class="historyBox" id="historyList"></div>
+  </div>
+
 </div>
 
 <!-- PREVIEW -->
-<div class="preview" id="previewBox">
+<div class="preview">
   <h3>📱 Preview</h3>
-
   <div class="notification">
-    <div class="title" id="previewTitle">Título...</div>
-    <div class="body" id="previewBody">Mensagem...</div>
+    <div id="previewTitle">Título...</div>
+    <div id="previewBody">Mensagem...</div>
   </div>
-
 </div>
 
 </div>
 
 <script>
 const API = "https://api-push.onrender.com";
+
+let history = [];
 
 // AUTO LOGIN
 window.onload = () => {
@@ -136,8 +146,8 @@ window.onload = () => {
 
 // LOGIN
 async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = emailInput.value;
+  const password = passwordInput.value;
 
   const res = await fetch(API + "/login", {
     method: "POST",
@@ -150,15 +160,13 @@ async function login() {
   if (data.token) {
     localStorage.setItem("token", data.token);
     showDashboard();
-  } else {
-    document.getElementById("loginStatus").innerText = "❌ Login inválido";
   }
 }
 
 // SHOW
 function showDashboard() {
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("dashboardBox").style.display = "block";
+  loginBox.style.display = "none";
+  dashboardBox.style.display = "block";
 }
 
 // LOGOUT
@@ -167,25 +175,40 @@ function logout() {
   location.reload();
 }
 
-// CONTADORES + PREVIEW
-const titleInput = document.getElementById("titleInput");
-const messageInput = document.getElementById("messageInput");
+// CONTADORES
+titleInput.oninput = () => {
+  titleCount.innerText = titleInput.value.length + " / 30";
+  previewTitle.innerText = titleInput.value || "Título...";
+};
 
-titleInput.addEventListener("input", () => {
-  document.getElementById("titleCount").innerText =
-    titleInput.value.length + " / 30";
+messageInput.oninput = () => {
+  msgCount.innerText = messageInput.value.length + " / 120";
+  previewBody.innerText = messageInput.value || "Mensagem...";
+};
 
-  document.getElementById("previewTitle").innerText =
-    titleInput.value || "Título...";
-});
+// HISTÓRICO
+function toggleHistory() {
+  historySection.classList.toggle("hidden");
+}
 
-messageInput.addEventListener("input", () => {
-  document.getElementById("msgCount").innerText =
-    messageInput.value.length + " / 120";
+function updateHistoryUI() {
+  let sent = history.reduce((a,b)=>a+b.sent,0);
+  let failed = history.reduce((a,b)=>a+b.failed,0);
 
-  document.getElementById("previewBody").innerText =
-    messageInput.value || "Mensagem...";
-});
+  stats.innerHTML = `
+    ✅ Enviados: ${sent}<br>
+    ❌ Falhas: ${failed}
+  `;
+
+  historyList.innerHTML = history.map(h => `
+    <div>
+      <b>${h.title}</b><br>
+      ${h.body}<br>
+      ✅ ${h.sent} | ❌ ${h.failed}
+      <hr>
+    </div>
+  `).join("");
+}
 
 // SEND PUSH
 async function sendPush() {
@@ -194,14 +217,9 @@ async function sendPush() {
   const title = titleInput.value;
   const body = messageInput.value;
 
-  const status = document.getElementById("pushStatus");
+  if (!title || !body) return;
 
-  if (!title || !body) {
-    status.innerText = "⚠️ Preencha tudo";
-    return;
-  }
-
-  status.innerText = "⏳ Enviando...";
+  pushStatus.innerText = "⏳ Enviando...";
 
   const res = await fetch(API + "/send-push", {
     method: "POST",
@@ -212,19 +230,28 @@ async function sendPush() {
     body: JSON.stringify({ title, body })
   });
 
-  if (res.status === 401) {
-    localStorage.removeItem("token");
-    alert("Sessão expirada");
-    location.reload();
-    return;
-  }
-
   const data = await res.json();
 
   if (data.success) {
-    status.innerText = "✅ Enviado para " + data.sent + " dispositivos";
-  } else {
-    status.innerText = "❌ Erro";
+    pushStatus.innerText = "✅ Enviado";
+
+    // SALVA HISTÓRICO
+    history.unshift({
+      title,
+      body,
+      sent: data.sent,
+      failed: data.failed
+    });
+
+    updateHistoryUI();
+
+    // LIMPAR CAMPOS 🔥
+    titleInput.value = "";
+    messageInput.value = "";
+    titleCount.innerText = "0 / 30";
+    msgCount.innerText = "0 / 120";
+    previewTitle.innerText = "Título...";
+    previewBody.innerText = "Mensagem...";
   }
 }
 </script>
