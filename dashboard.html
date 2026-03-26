@@ -1,223 +1,121 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard Push</title>
+  <meta charset="UTF-8">
+  <title>Dashboard - New Push</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+    }
 
-.container {
-  display: flex;
-  gap: 30px;
-}
+    .container {
+      display: flex;
+      gap: 30px;
+    }
 
-.card {
-  background: #1e293b;
-  padding: 25px;
-  border-radius: 12px;
-  width: 320px;
-  color: white;
-  display: flex;
-  flex-direction: column;
-}
+    .box {
+      background: #1e293b;
+      padding: 25px;
+      border-radius: 12px;
+      width: 300px;
+    }
 
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 6px;
-  border: none;
-  font-size: 14px;
-}
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+    }
 
-textarea {
-  height: 120px;
-  resize: none;
-}
+    button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-.counter {
-  font-size: 12px;
-  text-align: right;
-  opacity: 0.7;
-}
+    .send {
+      background: #22c55e;
+    }
 
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-}
+    .logout {
+      background: #ef4444;
+    }
 
-.btn-send { background: #22c55e; }
-.btn-history { background: #3b82f6; }
-.btn-exit { background: #ef4444; }
-
-.preview-box {
-  background: #334155;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 15px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  min-height: 120px;
-}
-
-.section-buttons {
-  margin-top: 20px;
-}
-
-#status {
-  margin-top: 10px;
-}
-</style>
+    .nav {
+      background: #3b82f6;
+    }
+  </style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <!-- ESQUERDA -->
-  <div class="card">
-    <h2>🚀 Push Dashboard</h2>
+  <div class="box">
+    <h3>🚀 Push Dashboard</h3>
 
-    <input id="title" maxlength="30" placeholder="Título">
-    <div class="counter" id="countTitle">0 / 30</div>
+    <input id="title" placeholder="Título">
+    <textarea id="body" placeholder="Mensagem"></textarea>
 
-    <textarea id="message" maxlength="120" placeholder="Mensagem"></textarea>
-    <div class="counter" id="countMsg">0 / 120</div>
-
-    <button class="btn-send" onclick="sendPush()">Enviar Push</button>
-    <button class="btn-exit" onclick="logout()">Sair</button>
-
-    <div id="status"></div>
+    <button class="send" onclick="send()">Enviar Push</button>
+    <button class="logout" onclick="logout()">Sair</button>
   </div>
 
-  <!-- DIREITA -->
-  <div class="card">
-    <h3>📱 Preview</h3>
+  <div class="box">
+    <h3>📱 Navegação</h3>
 
-    <div class="preview-box">
-      <strong id="previewTitle">Título...</strong><br><br>
-      <span id="previewMsg">Mensagem...</span>
-    </div>
-
-    <div class="section-buttons">
-      <button class="btn-history" onclick="goHistorico()">📊 Histórico</button>
-      <button class="btn-history" onclick="goStats()">📈 Estatísticas</button>
-    </div>
-
+    <button class="nav" onclick="go('historico.html')">Histórico</button>
+    <button class="nav" onclick="go('estatisticas.html')">Estatísticas</button>
+    <button class="nav" onclick="go('agendamentos.html')">⏰ Agendamentos</button>
   </div>
 
 </div>
 
 <script>
 const API = "https://api-push.onrender.com";
+const token = localStorage.getItem("token");
 
-// ELEMENTOS
-const titleInput = document.getElementById("title");
-const msgInput = document.getElementById("message");
-
-// 🔐 PROTEÇÃO (SEM MENSAGEM PADRÃO AGORA)
-window.onload = () => {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    window.location.href = "index.html";
-    return;
-  }
-
-  // iniciar vazio
-  document.getElementById("previewTitle").innerText = "Título...";
-  document.getElementById("previewMsg").innerText = "Mensagem...";
-};
-
-// CONTADORES + PREVIEW
-titleInput.oninput = () => {
-  document.getElementById("countTitle").innerText = titleInput.value.length + " / 30";
-  document.getElementById("previewTitle").innerText = titleInput.value || "Título...";
-};
-
-msgInput.oninput = () => {
-  document.getElementById("countMsg").innerText = msgInput.value.length + " / 120";
-  document.getElementById("previewMsg").innerText = msgInput.value || "Mensagem...";
-};
-
-// 🚀 ENVIO
-async function sendPush() {
-  const token = localStorage.getItem("token");
-
-  const title = titleInput.value;
-  const body = msgInput.value;
-
-  try {
-    const res = await fetch(API + "/send-push", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify({ title, body })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      document.getElementById("status").innerText = "❌ " + (data.error || "Erro");
-      return;
-    }
-
-    // HISTÓRICO
-    let historico = JSON.parse(localStorage.getItem("historico")) || [];
-
-    historico.push({
-      title,
-      body,
-      date: new Date().toLocaleString()
-    });
-
-    localStorage.setItem("historico", JSON.stringify(historico));
-
-    document.getElementById("status").innerText = "✅ Enviado com sucesso";
-
-    // LIMPAR CAMPOS
-    titleInput.value = "";
-    msgInput.value = "";
-
-    document.getElementById("countTitle").innerText = "0 / 30";
-    document.getElementById("countMsg").innerText = "0 / 120";
-
-    document.getElementById("previewTitle").innerText = "Título...";
-    document.getElementById("previewMsg").innerText = "Mensagem...";
-
-  } catch {
-    document.getElementById("status").innerText = "❌ Erro de conexão";
-  }
+if (!token) {
+  window.location.href = "index.html";
 }
 
-// NAV
-function goHistorico() {
-  window.location.href = "historico.html";
-}
+async function send() {
+  const title = document.getElementById("title").value;
+  const body = document.getElementById("body").value;
 
-function goStats() {
-  window.location.href = "estatisticas.html";
+  await fetch(API + "/send-push", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ title, body })
+  });
+
+  alert("Enviado 🚀");
 }
 
 function logout() {
   localStorage.removeItem("token");
   window.location.href = "index.html";
+}
+
+function go(page) {
+  window.location.href = page;
 }
 </script>
 
