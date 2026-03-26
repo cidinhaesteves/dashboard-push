@@ -2,254 +2,155 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Agendamentos - New Push</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agendamentos</title>
 
 <style>
 body {
-  margin: 0;
   font-family: Arial;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
+  background: #0f172a;
   color: white;
   padding: 20px;
-}
-
-h1 {
-  color: #38bdf8;
 }
 
 .container {
   display: flex;
   gap: 20px;
-  flex-wrap: wrap;
 }
 
 .box {
   background: #1e293b;
   padding: 20px;
   border-radius: 10px;
-  width: 350px;
+  width: 320px;
 }
 
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  margin-bottom: 5px;
+.preview, .item {
+  background: #334155;
+  padding: 15px;
+  border-radius: 10px;
+  word-wrap: break-word;
 }
 
 .counter {
   font-size: 12px;
   text-align: right;
-  margin-bottom: 10px;
-  opacity: 0.7;
 }
 
-button {
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  width: 100%;
-}
+button { width: 100%; padding: 10px; margin-top: 10px; }
 
-.btn {
-  background: #22c55e;
-}
-
-.cancel {
-  background: #ef4444;
-  margin-top: 10px;
-}
-
-.preview {
-  background: #334155;
-  padding: 15px;
-  border-radius: 10px;
-}
-
-.item {
-  background: #334155;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-.status-ok {
-  color: #22c55e;
-}
-
-.status-wait {
-  color: #facc15;
-}
+.cancel { background: red; }
 </style>
 </head>
 
 <body>
 
-<h1>⏰ Agendamentos</h1>
+<h2>⏰ Agendamentos</h2>
 
 <select id="filter" onchange="loadSchedules()">
-  <option value="all">Todos</option>
-  <option value="pending">Pendentes</option>
-  <option value="sent">Enviados</option>
+<option value="all">Todos</option>
+<option value="pending">Pendentes</option>
+<option value="sent">Enviados</option>
 </select>
 
 <div class="container">
 
-  <!-- FORM -->
-  <div class="box">
+<div class="box">
 
-    <input id="title" maxlength="30" placeholder="Título" oninput="updatePreview()">
-    <div class="counter" id="titleCount">0/30</div>
+<input id="title" maxlength="30" oninput="updatePreview()">
+<div class="counter" id="tc">0/30</div>
 
-    <textarea id="body" maxlength="120" placeholder="Mensagem" oninput="updatePreview()"></textarea>
-    <div class="counter" id="bodyCount">0/120</div>
+<textarea id="body" maxlength="120" oninput="updatePreview()"></textarea>
+<div class="counter" id="bc">0/120</div>
 
-    <input id="date" type="datetime-local">
+<input id="date" type="datetime-local">
 
-    <button class="btn" onclick="createSchedule()">Agendar Push</button>
-
-  </div>
-
-  <!-- PREVIEW -->
-  <div class="box">
-    <h3>📱 Preview</h3>
-
-    <div class="preview">
-      <strong id="pTitle">Título...</strong>
-      <p id="pBody">Mensagem...</p>
-    </div>
-
-  </div>
+<button onclick="create()">Agendar</button>
 
 </div>
 
-<!-- LISTA -->
-<div class="box" style="margin-top:20px;">
-  <h3>📋 Lista</h3>
-  <div id="list"></div>
+<div class="box">
+<div class="preview">
+<strong id="pt">Título...</strong>
+<p id="pb">Mensagem...</p>
 </div>
+</div>
+
+</div>
+
+<h3>Lista</h3>
+<div id="list"></div>
 
 <script>
 const API = "https://api-push.onrender.com";
 const token = localStorage.getItem("token");
 
-if (!token) {
-  window.location.href = "index.html";
+function updatePreview(){
+pt.innerText = title.value;
+pb.innerText = body.value;
+tc.innerText = title.value.length+"/30";
+bc.innerText = body.value.length+"/120";
 }
 
-// ================= PREVIEW =================
-function updatePreview() {
-  const title = document.getElementById("title").value;
-  const body = document.getElementById("body").value;
+async function create(){
+await fetch(API+"/schedule",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+},
+body:JSON.stringify({
+title:title.value,
+body:body.value,
+sendAt:date.value
+})
+});
 
-  document.getElementById("pTitle").innerText = title || "Título...";
-  document.getElementById("pBody").innerText = body || "Mensagem...";
+title.value="";
+body.value="";
+date.value="";
+updatePreview();
 
-  document.getElementById("titleCount").innerText = title.length + "/30";
-  document.getElementById("bodyCount").innerText = body.length + "/120";
+loadSchedules();
 }
 
-// ================= CRIAR =================
-async function createSchedule() {
-  const title = document.getElementById("title").value;
-  const body = document.getElementById("body").value;
-  const date = document.getElementById("date").value;
+async function loadSchedules(){
+const res = await fetch(API+"/schedules",{headers:{Authorization:"Bearer "+token}});
+let data = await res.json();
 
-  if (!title || !body || !date) {
-    alert("Preencha tudo");
-    return;
-  }
+// 🔥 ORDEM CORRETA (RECENTE PRIMEIRO)
+data.sort((a,b)=> new Date(b.sendAt)-new Date(a.sendAt));
 
-  await fetch(API + "/schedule", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({
-      title,
-      body,
-      sendAt: date
-    })
-  });
-
-  // 🔥 LIMPA CAMPOS
-  document.getElementById("title").value = "";
-  document.getElementById("body").value = "";
-  document.getElementById("date").value = "";
-
-  updatePreview();
-
-  alert("Agendado 🚀");
-
-  loadSchedules();
+if(filter.value==="pending"){
+data = data.filter(i=>!i.sent);
+}
+if(filter.value==="sent"){
+data = data.filter(i=>i.sent);
 }
 
-// ================= LISTAR =================
-async function loadSchedules() {
-  const filter = document.getElementById("filter").value;
+list.innerHTML="";
 
-  const res = await fetch(API + "/schedules", {
-    headers: {
-      "Authorization": "Bearer " + token
-    }
-  });
+data.forEach(i=>{
+const div=document.createElement("div");
+div.className="item";
 
-  let data = await res.json();
+div.innerHTML=`
+<strong>${i.title}</strong>
+<div>${i.body}</div>
+<div>${new Date(i.sendAt).toLocaleString()}</div>
+<div>${i.sent?"✔ Enviado":"⏳ Pendente"}</div>
+${!i.sent?`<button class="cancel" onclick="cancel('${i._id}')">Cancelar</button>`:""}
+`;
 
-  // 🔥 CORREÇÃO DE FILTRO
-  if (filter === "pending") {
-    data = data.filter(i => !i.sent);
-  }
-
-  if (filter === "sent") {
-    data = data.filter(i => i.sent);
-  }
-
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-
-  data.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "item";
-
-    div.innerHTML = `
-      <strong>${item.title}</strong>
-      <div>${item.body}</div>
-
-      <div>📅 ${new Date(item.sendAt).toLocaleString()}</div>
-
-      ${item.sent
-        ? `<div class="status-ok">✔ Enviado</div>`
-        : `<div class="status-wait">⏳ Pendente</div>`
-      }
-
-      ${!item.sent
-        ? `<button class="cancel" onclick="cancel('${item._id}')">Cancelar</button>`
-        : ""
-      }
-    `;
-
-    list.appendChild(div);
-  });
+list.appendChild(div);
+});
 }
 
-// ================= CANCELAR =================
-async function cancel(id) {
-  if (!confirm("Cancelar?")) return;
-
-  await fetch(API + "/schedule/" + id, {
-    method: "DELETE",
-    headers: {
-      "Authorization": "Bearer " + token
-    }
-  });
-
-  loadSchedules();
+async function cancel(id){
+await fetch(API+"/schedule/"+id,{
+method:"DELETE",
+headers:{Authorization:"Bearer "+token}
+});
+loadSchedules();
 }
 
 updatePreview();
