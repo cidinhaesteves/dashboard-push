@@ -1,1 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Estatísticas</title>
 
+<style>
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  padding: 20px;
+}
+
+.box {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📈 Estatísticas</h2>
+
+<div class="box">
+  <h3>Total enviados</h3>
+  <p id="total"></p>
+</div>
+
+<button onclick="voltar()">⬅ Voltar</button>
+
+<script>
+const historico = JSON.parse(localStorage.getItem("historico")) || [];
+
+document.getElementById("total").innerText = historico.length;
+
+function voltar() {
+  window.location.href = "dashboard.html";
+}
+</script>
+
+</body>
+</html>
