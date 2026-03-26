@@ -57,7 +57,6 @@ button {
 .btn-history { background: #3b82f6; }
 .btn-exit { background: #ef4444; }
 
-/* ✅ CORREÇÃO DO PREVIEW */
 .preview-box {
   background: #334155;
   padding: 10px;
@@ -108,10 +107,11 @@ button {
 <script>
 const API = "https://api-push.onrender.com";
 
-// CONTADORES + PREVIEW
+// ELEMENTOS
 const titleInput = document.getElementById("title");
 const msgInput = document.getElementById("message");
 
+// CONTADORES + PREVIEW
 titleInput.oninput = () => {
   document.getElementById("countTitle").innerText = titleInput.value.length + " / 30";
   document.getElementById("previewTitle").innerText = titleInput.value || "Título...";
@@ -122,35 +122,52 @@ msgInput.oninput = () => {
   document.getElementById("previewMsg").innerText = msgInput.value || "Mensagem...";
 };
 
-// ENVIAR PUSH
+// 🚀 ENVIAR PUSH (COM HISTÓRICO)
 async function sendPush() {
   const token = localStorage.getItem("token");
 
   const title = titleInput.value;
   const body = msgInput.value;
 
-  const res = await fetch(API + "/send-push", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({ title, body })
-  });
+  try {
+    const res = await fetch(API + "/send-push", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, body })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  document.getElementById("status").innerText = "✅ Enviado";
+    // 🔥 SALVAR HISTÓRICO
+    let historico = JSON.parse(localStorage.getItem("historico")) || [];
 
-  // ✅ LIMPAR CAMPOS
-  titleInput.value = "";
-  msgInput.value = "";
+    historico.push({
+      title,
+      body,
+      date: new Date().toLocaleString()
+    });
 
-  document.getElementById("countTitle").innerText = "0 / 30";
-  document.getElementById("countMsg").innerText = "0 / 120";
+    localStorage.setItem("historico", JSON.stringify(historico));
 
-  document.getElementById("previewTitle").innerText = "Título...";
-  document.getElementById("previewMsg").innerText = "Mensagem...";
+    // STATUS
+    document.getElementById("status").innerText = "✅ Enviado com sucesso";
+
+    // LIMPAR CAMPOS
+    titleInput.value = "";
+    msgInput.value = "";
+
+    document.getElementById("countTitle").innerText = "0 / 30";
+    document.getElementById("countMsg").innerText = "0 / 120";
+
+    document.getElementById("previewTitle").innerText = "Título...";
+    document.getElementById("previewMsg").innerText = "Mensagem...";
+
+  } catch (error) {
+    document.getElementById("status").innerText = "❌ Erro ao enviar";
+  }
 }
 
 // NAVEGAÇÃO
