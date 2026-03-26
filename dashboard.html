@@ -1,87 +1,102 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard - New Push</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Dashboard - New Push</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: white;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: white;
+}
 
-    .container {
-      display: flex;
-      gap: 30px;
-    }
+.container {
+  display: flex;
+  gap: 30px;
+}
 
-    .box {
-      background: #1e293b;
-      padding: 25px;
-      border-radius: 12px;
-      width: 300px;
-    }
+.box {
+  background: #1e293b;
+  padding: 25px;
+  border-radius: 12px;
+  width: 320px;
+}
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      border: none;
-    }
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  margin-bottom: 5px;
+}
 
-    button {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      margin-bottom: 10px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.counter {
+  font-size: 12px;
+  text-align: right;
+  margin-bottom: 10px;
+  opacity: 0.7;
+}
 
-    .send {
-      background: #22c55e;
-    }
+.preview {
+  background: #334155;
+  padding: 15px;
+  border-radius: 10px;
+  word-wrap: break-word;
+}
 
-    .logout {
-      background: #ef4444;
-    }
+button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  margin-bottom: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    .nav {
-      background: #3b82f6;
-    }
-  </style>
+.send { background: #22c55e; }
+.logout { background: #ef4444; }
+.nav { background: #3b82f6; }
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <div class="box">
-    <h3>🚀 Push Dashboard</h3>
+<div class="box">
+<h3>🚀 Push Dashboard</h3>
 
-    <input id="title" placeholder="Título">
-    <textarea id="body" placeholder="Mensagem"></textarea>
+<input id="title" maxlength="30" placeholder="Título" oninput="updatePreview()">
+<div class="counter" id="titleCount">0/30</div>
 
-    <button class="send" onclick="send()">Enviar Push</button>
-    <button class="logout" onclick="logout()">Sair</button>
-  </div>
+<textarea id="body" maxlength="120" placeholder="Mensagem" oninput="updatePreview()"></textarea>
+<div class="counter" id="bodyCount">0/120</div>
 
-  <div class="box">
-    <h3>📱 Navegação</h3>
+<button class="send" onclick="send()">Enviar Push</button>
+<button class="logout" onclick="logout()">Sair</button>
+</div>
 
-    <button class="nav" onclick="go('historico.html')">Histórico</button>
-    <button class="nav" onclick="go('estatisticas.html')">Estatísticas</button>
-    <button class="nav" onclick="go('agendamentos.html')">⏰ Agendamentos</button>
-  </div>
+<div class="box">
+<h3>📱 Preview</h3>
+
+<div class="preview">
+<strong id="pTitle">Título...</strong>
+<p id="pBody">Mensagem...</p>
+</div>
+
+<button class="nav" onclick="go('historico.html')">Histórico</button>
+<button class="nav" onclick="go('estatisticas.html')">Estatísticas</button>
+<button class="nav" onclick="go('agendamentos.html')">Agendamentos</button>
+
+</div>
 
 </div>
 
@@ -89,22 +104,35 @@
 const API = "https://api-push.onrender.com";
 const token = localStorage.getItem("token");
 
-if (!token) {
-  window.location.href = "index.html";
+if (!token) window.location.href = "index.html";
+
+function updatePreview() {
+  const t = title.value;
+  const b = body.value;
+
+  pTitle.innerText = t || "Título...";
+  pBody.innerText = b || "Mensagem...";
+
+  titleCount.innerText = t.length + "/30";
+  bodyCount.innerText = b.length + "/120";
 }
 
 async function send() {
-  const title = document.getElementById("title").value;
-  const body = document.getElementById("body").value;
-
   await fetch(API + "/send-push", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + token
     },
-    body: JSON.stringify({ title, body })
+    body: JSON.stringify({
+      title: title.value,
+      body: body.value
+    })
   });
+
+  title.value = "";
+  body.value = "";
+  updatePreview();
 
   alert("Enviado 🚀");
 }
@@ -114,9 +142,11 @@ function logout() {
   window.location.href = "index.html";
 }
 
-function go(page) {
-  window.location.href = page;
+function go(p) {
+  window.location.href = p;
 }
+
+updatePreview();
 </script>
 
 </body>
