@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Push Dashboard</title>
+<title>Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -10,38 +10,24 @@ body {
   margin: 0;
   font-family: Arial;
   background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: white;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
 }
 
-.wrapper {
-  display: flex;
-  gap: 20px;
-}
-
 .container {
-  width: 320px;
   background: #1e293b;
-  padding: 20px;
+  padding: 30px;
   border-radius: 12px;
+  width: 300px;
+  color: white;
 }
 
-.preview {
-  width: 260px;
-  background: #0f172a;
-  padding: 20px;
-  border-radius: 12px;
-}
-
-.hidden { display: none; }
-
-input, textarea {
+input {
   width: 100%;
   padding: 10px;
-  margin-top: 8px;
+  margin-top: 10px;
   border-radius: 6px;
   border: none;
 }
@@ -49,105 +35,35 @@ input, textarea {
 button {
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
-  border-radius: 6px;
+  margin-top: 15px;
+  background: #22c55e;
   border: none;
+  border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
-}
-
-.send { background: #22c55e; }
-.logout { background: #ef4444; }
-.historyBtn { background: #3b82f6; }
-
-.counter {
-  font-size: 12px;
-  text-align: right;
-  opacity: 0.7;
-}
-
-.notification {
-  background: #1e293b;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.historyBox {
-  margin-top: 10px;
-  max-height: 200px;
-  overflow-y: auto;
-  font-size: 12px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="wrapper">
-
-<!-- LOGIN -->
-<div class="container" id="loginBox">
+<div class="container">
   <h2>🔐 Login</h2>
+
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Senha">
+
   <button onclick="login()">Entrar</button>
-  <div id="loginStatus"></div>
-</div>
 
-<!-- DASHBOARD -->
-<div class="container hidden" id="dashboardBox">
-
-  <h2>🚀 Push Dashboard</h2>
-
-  <input id="titleInput" maxlength="30" placeholder="Título">
-  <div class="counter" id="titleCount">0 / 30</div>
-
-  <textarea id="messageInput" maxlength="120" placeholder="Mensagem"></textarea>
-  <div class="counter" id="msgCount">0 / 120</div>
-
-  <button class="send" onclick="sendPush()">Enviar Push</button>
-  <button class="historyBtn" onclick="toggleHistory()">📊 Histórico</button>
-  <button class="logout" onclick="logout()">Sair</button>
-
-  <div id="pushStatus"></div>
-
-  <!-- HISTÓRICO -->
-  <div id="historySection" class="hidden">
-    <h4>📊 Estatísticas</h4>
-    <div id="stats"></div>
-
-    <h4>📨 Últimos envios</h4>
-    <div class="historyBox" id="historyList"></div>
-  </div>
-
-</div>
-
-<!-- PREVIEW -->
-<div class="preview">
-  <h3>📱 Preview</h3>
-  <div class="notification">
-    <div id="previewTitle">Título...</div>
-    <div id="previewBody">Mensagem...</div>
-  </div>
-</div>
-
+  <div id="status"></div>
 </div>
 
 <script>
 const API = "https://api-push.onrender.com";
 
-let history = [];
-
-// AUTO LOGIN
-window.onload = () => {
-  const token = localStorage.getItem("token");
-  if (token) showDashboard();
-};
-
-// LOGIN
 async function login() {
-  const email = emailInput.value;
-  const password = passwordInput.value;
+  const email = email.value;
+  const password = password.value;
 
   const res = await fetch(API + "/login", {
     method: "POST",
@@ -159,99 +75,11 @@ async function login() {
 
   if (data.token) {
     localStorage.setItem("token", data.token);
-    showDashboard();
-  }
-}
 
-// SHOW
-function showDashboard() {
-  loginBox.style.display = "none";
-  dashboardBox.style.display = "block";
-}
-
-// LOGOUT
-function logout() {
-  localStorage.removeItem("token");
-  location.reload();
-}
-
-// CONTADORES
-titleInput.oninput = () => {
-  titleCount.innerText = titleInput.value.length + " / 30";
-  previewTitle.innerText = titleInput.value || "Título...";
-};
-
-messageInput.oninput = () => {
-  msgCount.innerText = messageInput.value.length + " / 120";
-  previewBody.innerText = messageInput.value || "Mensagem...";
-};
-
-// HISTÓRICO
-function toggleHistory() {
-  historySection.classList.toggle("hidden");
-}
-
-function updateHistoryUI() {
-  let sent = history.reduce((a,b)=>a+b.sent,0);
-  let failed = history.reduce((a,b)=>a+b.failed,0);
-
-  stats.innerHTML = `
-    ✅ Enviados: ${sent}<br>
-    ❌ Falhas: ${failed}
-  `;
-
-  historyList.innerHTML = history.map(h => `
-    <div>
-      <b>${h.title}</b><br>
-      ${h.body}<br>
-      ✅ ${h.sent} | ❌ ${h.failed}
-      <hr>
-    </div>
-  `).join("");
-}
-
-// SEND PUSH
-async function sendPush() {
-  const token = localStorage.getItem("token");
-
-  const title = titleInput.value;
-  const body = messageInput.value;
-
-  if (!title || !body) return;
-
-  pushStatus.innerText = "⏳ Enviando...";
-
-  const res = await fetch(API + "/send-push", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({ title, body })
-  });
-
-  const data = await res.json();
-
-  if (data.success) {
-    pushStatus.innerText = "✅ Enviado";
-
-    // SALVA HISTÓRICO
-    history.unshift({
-      title,
-      body,
-      sent: data.sent,
-      failed: data.failed
-    });
-
-    updateHistoryUI();
-
-    // LIMPAR CAMPOS 🔥
-    titleInput.value = "";
-    messageInput.value = "";
-    titleCount.innerText = "0 / 30";
-    msgCount.innerText = "0 / 120";
-    previewTitle.innerText = "Título...";
-    previewBody.innerText = "Mensagem...";
+    // 🔥 REDIRECIONA
+    window.location.href = "dashboard.html";
+  } else {
+    status.innerText = "❌ Login inválido";
   }
 }
 </script>
