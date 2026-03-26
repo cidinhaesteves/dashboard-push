@@ -1,55 +1,88 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Histórico</title>
+<title>Histórico - New Push</title>
 
 <style>
 body {
   font-family: Arial;
-  background: #0f172a;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
   color: white;
   padding: 20px;
 }
 
-.card {
-  background: #1e293b;
+h1 {
+  color: #38bdf8;
+}
+
+.item {
+  background: #334155;
   padding: 15px;
-  margin-bottom: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
+  margin-top: 10px;
+  word-wrap: break-word;
+}
+
+.meta {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 5px;
+}
+
+button {
+  margin-bottom: 20px;
+  padding: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>📊 Histórico de Envios</h2>
-
-<div id="list"></div>
+<h1>📊 Histórico de Envios</h1>
 
 <button onclick="voltar()">⬅ Voltar</button>
 
+<div id="list"></div>
+
 <script>
-const list = document.getElementById("list");
+const API = "https://api-push.onrender.com";
+const token = localStorage.getItem("token");
 
-const historico = JSON.parse(localStorage.getItem("historico")) || [];
+async function load() {
+  const res = await fetch(API + "/notifications", {
+    headers: {
+      Authorization: "Bearer " + token
+    }
+  });
 
-historico.reverse().forEach(item => {
-  const div = document.createElement("div");
-  div.className = "card";
+  let data = await res.json();
 
-  div.innerHTML = `
-    <strong>${item.title}</strong><br>
-    <small>${item.body}</small><br>
-    <em>${item.date}</em>
-  `;
+  // 🔥 ORDEM DECRESCENTE
+  data.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
 
-  list.appendChild(div);
-});
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach(n => {
+    const div = document.createElement("div");
+    div.className = "item";
+
+    div.innerHTML = `
+      <strong>${n.title}</strong>
+      <div>${n.body}</div>
+      <div class="meta">📅 ${new Date(n.createdAt).toLocaleString()}</div>
+    `;
+
+    list.appendChild(div);
+  });
+}
 
 function voltar() {
   window.location.href = "dashboard.html";
 }
+
+load();
 </script>
 
 </body>
