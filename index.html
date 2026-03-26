@@ -51,6 +51,10 @@
       cursor: pointer;
     }
 
+    .logout {
+      background: #ef4444;
+    }
+
     .hidden {
       display: none;
     }
@@ -82,6 +86,8 @@
     <textarea id="message" placeholder="Mensagem (max 120)"></textarea>
 
     <button onclick="sendPush()">Enviar Push</button>
+    <button class="logout" onclick="logout()">Sair</button>
+
     <div class="status" id="pushStatus"></div>
   </div>
 
@@ -93,9 +99,7 @@ const API = "https://api-push.onrender.com";
 // ============================
 window.onload = () => {
   const token = localStorage.getItem("token");
-  if (token) {
-    showDashboard();
-  }
+  if (token) showDashboard();
 };
 
 // ============================
@@ -105,19 +109,27 @@ async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const res = await fetch(API + "/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
+  const status = document.getElementById("loginStatus");
+  status.innerText = "⏳ Entrando...";
 
-  const data = await res.json();
+  try {
+    const res = await fetch(API + "/login", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ email, password })
+    });
 
-  if (data.token) {
-    localStorage.setItem("token", data.token);
-    showDashboard();
-  } else {
-    document.getElementById("loginStatus").innerText = "❌ Login inválido";
+    const data = await res.json();
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      showDashboard();
+    } else {
+      status.innerText = "❌ Login inválido";
+    }
+
+  } catch {
+    status.innerText = "❌ Erro ao conectar";
   }
 }
 
@@ -130,6 +142,14 @@ function showDashboard() {
 }
 
 // ============================
+// LOGOUT
+// ============================
+function logout() {
+  localStorage.removeItem("token");
+  location.reload();
+}
+
+// ============================
 // ENVIAR PUSH
 // ============================
 async function sendPush() {
@@ -137,24 +157,42 @@ async function sendPush() {
 
   const title = document.getElementById("title").value;
   const body = document.getElementById("message").value;
+  const status = document.getElementById("pushStatus");
 
-  const res = await fetch(API + "/send-push", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({ title, body })
-  });
+  if (!title || !body) {
+    status.innerText = "⚠️ Preencha título e mensagem";
+    return;
+  }
 
-  const data = await res.json();
+  status.innerText = "⏳ Enviando...";
 
-  if (data.success) {
-    document.getElementById("pushStatus").innerText =
-      "✅ Enviado para " + data.sent + " dispositivos";
-  } else {
-    document.getElementById("pushStatus").innerText =
-      "❌ Erro ao enviar";
+  try {
+    const res = await fetch(API + "/send-push", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, body })
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      alert("Sessão expirada. Faça login novamente.");
+      location.reload();
+      return;
+    }
+
+    const data = await res.json();
+
+    if (data.success) {
+      status.innerText = `✅ Enviado para ${data.sent} dispositivos`;
+    } else {
+      status.innerText = "❌ Falha no envio";
+    }
+
+  } catch {
+    status.innerText = "❌ Erro de conexão";
   }
 }
 </script>
