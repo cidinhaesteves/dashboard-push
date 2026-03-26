@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Dashboard Push</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
@@ -64,7 +63,6 @@ button {
   margin-top: 10px;
   white-space: pre-wrap;
   word-wrap: break-word;
-  overflow-wrap: break-word;
 }
 </style>
 </head>
@@ -95,7 +93,6 @@ button {
 
   <div class="card">
     <h3>📱 Preview</h3>
-
     <div class="preview-box">
       <strong id="previewTitle">Título...</strong><br>
       <span id="previewMsg">Mensagem...</span>
@@ -107,11 +104,20 @@ button {
 <script>
 const API = "https://api-push.onrender.com";
 
+// 🔐 VERIFICA LOGIN AO ENTRAR
+window.onload = () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href = "index.html";
+  }
+};
+
 // ELEMENTOS
 const titleInput = document.getElementById("title");
 const msgInput = document.getElementById("message");
 
-// CONTADORES + PREVIEW
+// CONTADORES
 titleInput.oninput = () => {
   document.getElementById("countTitle").innerText = titleInput.value.length + " / 30";
   document.getElementById("previewTitle").innerText = titleInput.value || "Título...";
@@ -122,9 +128,14 @@ msgInput.oninput = () => {
   document.getElementById("previewMsg").innerText = msgInput.value || "Mensagem...";
 };
 
-// 🚀 ENVIAR PUSH (COM HISTÓRICO)
+// 🚀 ENVIO REAL (CORRIGIDO)
 async function sendPush() {
   const token = localStorage.getItem("token");
+
+  if (!token) {
+    document.getElementById("status").innerText = "❌ Faça login novamente";
+    return;
+  }
 
   const title = titleInput.value;
   const body = msgInput.value;
@@ -141,7 +152,13 @@ async function sendPush() {
 
     const data = await res.json();
 
-    // 🔥 SALVAR HISTÓRICO
+    // 🚨 SE NÃO FOR SUCESSO → NÃO SALVA
+    if (!res.ok) {
+      document.getElementById("status").innerText = "❌ Erro: " + (data.error || "Falha");
+      return;
+    }
+
+    // ✅ AGORA SIM SALVA HISTÓRICO
     let historico = JSON.parse(localStorage.getItem("historico")) || [];
 
     historico.push({
@@ -152,10 +169,9 @@ async function sendPush() {
 
     localStorage.setItem("historico", JSON.stringify(historico));
 
-    // STATUS
-    document.getElementById("status").innerText = "✅ Enviado com sucesso";
+    document.getElementById("status").innerText = "✅ Push enviado REAL";
 
-    // LIMPAR CAMPOS
+    // LIMPAR
     titleInput.value = "";
     msgInput.value = "";
 
@@ -166,11 +182,11 @@ async function sendPush() {
     document.getElementById("previewMsg").innerText = "Mensagem...";
 
   } catch (error) {
-    document.getElementById("status").innerText = "❌ Erro ao enviar";
+    document.getElementById("status").innerText = "❌ Erro de conexão";
   }
 }
 
-// NAVEGAÇÃO
+// NAV
 function goHistorico() {
   window.location.href = "historico.html";
 }
