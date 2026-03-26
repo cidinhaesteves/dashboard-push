@@ -1,163 +1,105 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Push Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .container {
-      width: 320px;
-      background: #1e293b;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: none;
-      outline: none;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 6px;
-      background: #22c55e;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .status {
-      margin-top: 10px;
-      font-size: 14px;
-      text-align: center;
-    }
-  </style>
-</head>
-
-<body>
-
-  <!-- LOGIN -->
-  <div class="container" id="loginBox">
-    <h2>🔐 Login</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Senha">
-    <button onclick="login()">Entrar</button>
-    <div class="status" id="loginStatus"></div>
-  </div>
-
-  <!-- DASHBOARD -->
-  <div class="container hidden" id="dashboardBox">
-    <h2>🚀 Push Dashboard</h2>
-
-    <input type="text" id="title" placeholder="Título (max 30)">
-    <textarea id="message" placeholder="Mensagem (max 120)"></textarea>
-
-    <button onclick="sendPush()">Enviar Push</button>
-    <div class="status" id="pushStatus"></div>
-  </div>
-
 <script>
 const API = "https://api-push.onrender.com";
 
-// ============================
+// =====================
 // AUTO LOGIN
-// ============================
+// =====================
 window.onload = () => {
   const token = localStorage.getItem("token");
+
   if (token) {
     showDashboard();
   }
 };
 
-// ============================
+// =====================
 // LOGIN
-// ============================
+// =====================
 async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  try {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-  const res = await fetch(API + "/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
+    console.log("🔐 Tentando login...");
 
-  const data = await res.json();
+    const res = await fetch(`${API}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
 
-  if (data.token) {
-    localStorage.setItem("token", data.token);
-    showDashboard();
-  } else {
-    document.getElementById("loginStatus").innerText = "❌ Login inválido";
+    console.log("📡 Status:", res.status);
+
+    const data = await res.json();
+
+    console.log("📦 Resposta:", data);
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      showDashboard();
+    } else {
+      document.getElementById("loginMsg").innerHTML =
+        `<div class="error">${data.error || "Erro no login"}</div>`;
+    }
+
+  } catch (err) {
+    console.error("❌ ERRO LOGIN:", err);
+
+    document.getElementById("loginMsg").innerHTML =
+      `<div class="error">Erro ao conectar com servidor</div>`;
   }
 }
 
-// ============================
+// =====================
 // MOSTRAR DASHBOARD
-// ============================
+// =====================
 function showDashboard() {
-  document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("dashboardBox").classList.remove("hidden");
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
 }
 
-// ============================
+// =====================
+// LOGOUT
+// =====================
+function logout() {
+  localStorage.removeItem("token");
+  location.reload();
+}
+
+// =====================
 // ENVIAR PUSH
-// ============================
+// =====================
 async function sendPush() {
-  const token = localStorage.getItem("token");
+  try {
+    const title = document.getElementById("title").value;
+    const body = document.getElementById("body").value;
 
-  const title = document.getElementById("title").value;
-  const body = document.getElementById("message").value;
+    const token = localStorage.getItem("token");
 
-  const res = await fetch(API + "/send-push", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({ title, body })
-  });
+    const res = await fetch(`${API}/send-push`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, body })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (data.success) {
-    document.getElementById("pushStatus").innerText =
-      "✅ Enviado para " + data.sent + " dispositivos";
-  } else {
-    document.getElementById("pushStatus").innerText =
-      "❌ Erro ao enviar";
+    if (data.success) {
+      document.getElementById("msg").innerHTML =
+        `<div class="success">✅ Enviado para ${data.sent}</div>`;
+    } else {
+      document.getElementById("msg").innerHTML =
+        `<div class="error">${data.error}</div>`;
+    }
+
+  } catch (err) {
+    document.getElementById("msg").innerHTML =
+      `<div class="error">Erro ao enviar push</div>`;
   }
 }
 </script>
-
-</body>
-</html>
