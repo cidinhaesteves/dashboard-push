@@ -1,124 +1,134 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Agendamentos - New Push</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Agendamentos - New Push</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: white;
-      padding: 20px;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+  padding: 20px;
+}
 
-    h1 {
-      color: #38bdf8;
-      margin-bottom: 10px;
-    }
+h1 {
+  color: #38bdf8;
+}
 
-    .top-bar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
+.container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
 
-    select {
-      padding: 8px;
-      border-radius: 6px;
-      border: none;
-    }
+.box {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 10px;
+  width: 350px;
+}
 
-    .box {
-      background: #1e293b;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  margin-bottom: 5px;
+}
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      border: none;
-    }
+.counter {
+  font-size: 12px;
+  text-align: right;
+  margin-bottom: 10px;
+  opacity: 0.7;
+}
 
-    button {
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+}
 
-    .btn {
-      background: #22c55e;
-      width: 100%;
-    }
+.btn {
+  background: #22c55e;
+}
 
-    .item {
-      background: #334155;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 12px;
-      transition: 0.2s;
-    }
+.cancel {
+  background: #ef4444;
+  margin-top: 10px;
+}
 
-    .item:hover {
-      transform: scale(1.01);
-    }
+.preview {
+  background: #334155;
+  padding: 15px;
+  border-radius: 10px;
+}
 
-    .status {
-      font-weight: bold;
-      margin-top: 5px;
-    }
+.item {
+  background: #334155;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
 
-    .ok {
-      color: #22c55e;
-    }
+.status-ok {
+  color: #22c55e;
+}
 
-    .wait {
-      color: #facc15;
-    }
-
-    .cancel {
-      background: #ef4444;
-      margin-top: 10px;
-      width: 100%;
-    }
-
-    .meta {
-      font-size: 12px;
-      opacity: 0.7;
-      margin-top: 5px;
-    }
-  </style>
+.status-wait {
+  color: #facc15;
+}
+</style>
 </head>
 
 <body>
 
 <h1>⏰ Agendamentos</h1>
 
-<div class="top-bar">
-  <select id="filter" onchange="loadSchedules()">
-    <option value="all">Todos</option>
-    <option value="pending">Pendentes</option>
-    <option value="sent">Enviados</option>
-  </select>
+<select id="filter" onchange="loadSchedules()">
+  <option value="all">Todos</option>
+  <option value="pending">Pendentes</option>
+  <option value="sent">Enviados</option>
+</select>
+
+<div class="container">
+
+  <!-- FORM -->
+  <div class="box">
+
+    <input id="title" maxlength="30" placeholder="Título" oninput="updatePreview()">
+    <div class="counter" id="titleCount">0/30</div>
+
+    <textarea id="body" maxlength="120" placeholder="Mensagem" oninput="updatePreview()"></textarea>
+    <div class="counter" id="bodyCount">0/120</div>
+
+    <input id="date" type="datetime-local">
+
+    <button class="btn" onclick="createSchedule()">Agendar Push</button>
+
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="box">
+    <h3>📱 Preview</h3>
+
+    <div class="preview">
+      <strong id="pTitle">Título...</strong>
+      <p id="pBody">Mensagem...</p>
+    </div>
+
+  </div>
+
 </div>
 
-<div class="box">
-  <input id="title" placeholder="Título">
-  <textarea id="body" placeholder="Mensagem"></textarea>
-  <input id="date" type="datetime-local">
-
-  <button class="btn" onclick="createSchedule()">Agendar Push</button>
-</div>
-
-<div class="box">
+<!-- LISTA -->
+<div class="box" style="margin-top:20px;">
   <h3>📋 Lista</h3>
   <div id="list"></div>
 </div>
@@ -128,8 +138,19 @@ const API = "https://api-push.onrender.com";
 const token = localStorage.getItem("token");
 
 if (!token) {
-  alert("Não autorizado");
   window.location.href = "index.html";
+}
+
+// ================= PREVIEW =================
+function updatePreview() {
+  const title = document.getElementById("title").value;
+  const body = document.getElementById("body").value;
+
+  document.getElementById("pTitle").innerText = title || "Título...";
+  document.getElementById("pBody").innerText = body || "Mensagem...";
+
+  document.getElementById("titleCount").innerText = title.length + "/30";
+  document.getElementById("bodyCount").innerText = body.length + "/120";
 }
 
 // ================= CRIAR =================
@@ -156,7 +177,15 @@ async function createSchedule() {
     })
   });
 
+  // 🔥 LIMPA CAMPOS
+  document.getElementById("title").value = "";
+  document.getElementById("body").value = "";
+  document.getElementById("date").value = "";
+
+  updatePreview();
+
   alert("Agendado 🚀");
+
   loadSchedules();
 }
 
@@ -172,7 +201,7 @@ async function loadSchedules() {
 
   let data = await res.json();
 
-  // 🔥 FILTRO
+  // 🔥 CORREÇÃO DE FILTRO
   if (filter === "pending") {
     data = data.filter(i => !i.sent);
   }
@@ -188,20 +217,21 @@ async function loadSchedules() {
     const div = document.createElement("div");
     div.className = "item";
 
-    const status = item.sent
-      ? `<span class="status ok">✔ Enviado</span>`
-      : `<span class="status wait">⏳ Pendente</span>`;
-
     div.innerHTML = `
       <strong>${item.title}</strong>
       <div>${item.body}</div>
 
-      <div class="meta">📅 Agendado: ${new Date(item.sendAt).toLocaleString()}</div>
-      ${item.executedAt ? `<div class="meta">🚀 Executado: ${new Date(item.executedAt).toLocaleString()}</div>` : ""}
+      <div>📅 ${new Date(item.sendAt).toLocaleString()}</div>
 
-      ${status}
+      ${item.sent
+        ? `<div class="status-ok">✔ Enviado</div>`
+        : `<div class="status-wait">⏳ Pendente</div>`
+      }
 
-      ${!item.sent ? `<button class="cancel" onclick="cancel('${item._id}')">Cancelar</button>` : ""}
+      ${!item.sent
+        ? `<button class="cancel" onclick="cancel('${item._id}')">Cancelar</button>`
+        : ""
+      }
     `;
 
     list.appendChild(div);
@@ -210,7 +240,7 @@ async function loadSchedules() {
 
 // ================= CANCELAR =================
 async function cancel(id) {
-  if (!confirm("Cancelar agendamento?")) return;
+  if (!confirm("Cancelar?")) return;
 
   await fetch(API + "/schedule/" + id, {
     method: "DELETE",
@@ -222,6 +252,7 @@ async function cancel(id) {
   loadSchedules();
 }
 
+updatePreview();
 loadSchedules();
 </script>
 
