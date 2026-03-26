@@ -17,15 +17,17 @@ body {
 
 .container {
   display: flex;
-  gap: 20px;
+  gap: 30px;
 }
 
 .card {
   background: #1e293b;
-  padding: 20px;
+  padding: 25px;
   border-radius: 12px;
-  width: 300px;
+  width: 320px;
   color: white;
+  display: flex;
+  flex-direction: column;
 }
 
 input, textarea {
@@ -34,6 +36,12 @@ input, textarea {
   margin-top: 10px;
   border-radius: 6px;
   border: none;
+  font-size: 14px;
+}
+
+textarea {
+  height: 120px; /* 🔥 MAIOR */
+  resize: none;
 }
 
 .counter {
@@ -58,11 +66,20 @@ button {
 
 .preview-box {
   background: #334155;
-  padding: 10px;
-  border-radius: 8px;
-  margin-top: 10px;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 15px;
   white-space: pre-wrap;
   word-wrap: break-word;
+  min-height: 120px;
+}
+
+.section-buttons {
+  margin-top: 20px;
+}
+
+#status {
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -71,6 +88,7 @@ button {
 
 <div class="container">
 
+  <!-- ESQUERDA -->
   <div class="card">
     <h2>🚀 Push Dashboard</h2>
 
@@ -80,23 +98,28 @@ button {
     <textarea id="message" maxlength="120" placeholder="Mensagem"></textarea>
     <div class="counter" id="countMsg">0 / 120</div>
 
+    <!-- 🔥 BOTÕES ABAIXO DA MENSAGEM -->
     <button class="btn-send" onclick="sendPush()">Enviar Push</button>
-
-    <button class="btn-history" onclick="goHistorico()">📊 Histórico</button>
-
-    <button class="btn-history" onclick="goStats()">📈 Estatísticas</button>
-
     <button class="btn-exit" onclick="logout()">Sair</button>
 
     <div id="status"></div>
   </div>
 
+  <!-- DIREITA -->
   <div class="card">
     <h3>📱 Preview</h3>
+
     <div class="preview-box">
-      <strong id="previewTitle">Título...</strong><br>
+      <strong id="previewTitle">Título...</strong><br><br>
       <span id="previewMsg">Mensagem...</span>
     </div>
+
+    <!-- 🔥 BOTÕES ABAIXO DO PREVIEW -->
+    <div class="section-buttons">
+      <button class="btn-history" onclick="goHistorico()">📊 Histórico</button>
+      <button class="btn-history" onclick="goStats()">📈 Estatísticas</button>
+    </div>
+
   </div>
 
 </div>
@@ -104,20 +127,17 @@ button {
 <script>
 const API = "https://api-push.onrender.com";
 
-// 🔐 VERIFICA LOGIN AO ENTRAR
+// 🔐 PROTEÇÃO
 window.onload = () => {
   const token = localStorage.getItem("token");
-
-  if (!token) {
-    window.location.href = "index.html";
-  }
+  if (!token) window.location.href = "index.html";
 };
 
 // ELEMENTOS
 const titleInput = document.getElementById("title");
 const msgInput = document.getElementById("message");
 
-// CONTADORES
+// CONTADORES + PREVIEW
 titleInput.oninput = () => {
   document.getElementById("countTitle").innerText = titleInput.value.length + " / 30";
   document.getElementById("previewTitle").innerText = titleInput.value || "Título...";
@@ -128,14 +148,9 @@ msgInput.oninput = () => {
   document.getElementById("previewMsg").innerText = msgInput.value || "Mensagem...";
 };
 
-// 🚀 ENVIO REAL (CORRIGIDO)
+// 🚀 ENVIO
 async function sendPush() {
   const token = localStorage.getItem("token");
-
-  if (!token) {
-    document.getElementById("status").innerText = "❌ Faça login novamente";
-    return;
-  }
 
   const title = titleInput.value;
   const body = msgInput.value;
@@ -152,13 +167,12 @@ async function sendPush() {
 
     const data = await res.json();
 
-    // 🚨 SE NÃO FOR SUCESSO → NÃO SALVA
     if (!res.ok) {
-      document.getElementById("status").innerText = "❌ Erro: " + (data.error || "Falha");
+      document.getElementById("status").innerText = "❌ " + (data.error || "Erro");
       return;
     }
 
-    // ✅ AGORA SIM SALVA HISTÓRICO
+    // SALVAR HISTÓRICO
     let historico = JSON.parse(localStorage.getItem("historico")) || [];
 
     historico.push({
@@ -169,9 +183,9 @@ async function sendPush() {
 
     localStorage.setItem("historico", JSON.stringify(historico));
 
-    document.getElementById("status").innerText = "✅ Push enviado REAL";
+    document.getElementById("status").innerText = "✅ Enviado com sucesso";
 
-    // LIMPAR
+    // LIMPAR CAMPOS
     titleInput.value = "";
     msgInput.value = "";
 
@@ -181,7 +195,7 @@ async function sendPush() {
     document.getElementById("previewTitle").innerText = "Título...";
     document.getElementById("previewMsg").innerText = "Mensagem...";
 
-  } catch (error) {
+  } catch {
     document.getElementById("status").innerText = "❌ Erro de conexão";
   }
 }
