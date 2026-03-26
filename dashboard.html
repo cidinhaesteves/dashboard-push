@@ -40,7 +40,7 @@ input, textarea {
 }
 
 textarea {
-  height: 120px; /* 🔥 MAIOR */
+  height: 120px;
   resize: none;
 }
 
@@ -98,7 +98,6 @@ button {
     <textarea id="message" maxlength="120" placeholder="Mensagem"></textarea>
     <div class="counter" id="countMsg">0 / 120</div>
 
-    <!-- 🔥 BOTÕES ABAIXO DA MENSAGEM -->
     <button class="btn-send" onclick="sendPush()">Enviar Push</button>
     <button class="btn-exit" onclick="logout()">Sair</button>
 
@@ -114,7 +113,6 @@ button {
       <span id="previewMsg">Mensagem...</span>
     </div>
 
-    <!-- 🔥 BOTÕES ABAIXO DO PREVIEW -->
     <div class="section-buttons">
       <button class="btn-history" onclick="goHistorico()">📊 Histórico</button>
       <button class="btn-history" onclick="goStats()">📈 Estatísticas</button>
@@ -127,15 +125,29 @@ button {
 <script>
 const API = "https://api-push.onrender.com";
 
-// 🔐 PROTEÇÃO
-window.onload = () => {
-  const token = localStorage.getItem("token");
-  if (!token) window.location.href = "index.html";
-};
-
 // ELEMENTOS
 const titleInput = document.getElementById("title");
 const msgInput = document.getElementById("message");
+
+// 🔐 PROTEÇÃO + 🔥 MENSAGEM PADRÃO
+window.onload = () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  // 🔥 MENSAGEM DE MARKETING AUTOMÁTICA
+  titleInput.value = "⚡ Reduza sua conta HOJE";
+  msgInput.value = "Clique para ver como economizar energia";
+
+  document.getElementById("previewTitle").innerText = titleInput.value;
+  document.getElementById("previewMsg").innerText = msgInput.value;
+
+  document.getElementById("countTitle").innerText = titleInput.value.length + " / 30";
+  document.getElementById("countMsg").innerText = msgInput.value.length + " / 120";
+};
 
 // CONTADORES + PREVIEW
 titleInput.oninput = () => {
@@ -172,7 +184,7 @@ async function sendPush() {
       return;
     }
 
-    // SALVAR HISTÓRICO
+    // HISTÓRICO
     let historico = JSON.parse(localStorage.getItem("historico")) || [];
 
     historico.push({
