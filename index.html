@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard - NEW PUSH</title>
+<title>Dashboard Push</title>
 
 <style>
 body {
@@ -28,17 +28,6 @@ body {
   color: white;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-}
-
-h2, h3 {
-  margin: 0 0 10px 0;
-}
-
-.brand {
-  font-size: 18px;
-  color: #38bdf8;
-  margin-bottom: 5px;
 }
 
 input, textarea {
@@ -101,9 +90,8 @@ button {
 
   <!-- ESQUERDA -->
   <div class="card">
-
-    <div class="brand">🚀 NEW PUSH</div>
-    <h2>Push Dashboard</h2>
+    <h2>🚀 NEW PUSH</h2>
+    <h3>Push Dashboard</h3>
 
     <input id="title" maxlength="30" placeholder="Título">
     <div class="counter" id="countTitle">0 / 30</div>
@@ -138,16 +126,14 @@ button {
 <script>
 const API = "https://api-push.onrender.com";
 
-// ELEMENTOS
 const titleInput = document.getElementById("title");
 const msgInput = document.getElementById("message");
 
-// 🔐 PROTEÇÃO DE ROTA (SEM LOOP)
 window.onload = () => {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    window.location.href = "ativar.html";
+    window.location.href = "index.html";
     return;
   }
 
@@ -155,7 +141,6 @@ window.onload = () => {
   document.getElementById("previewMsg").innerText = "Mensagem...";
 };
 
-// CONTADORES + PREVIEW
 titleInput.oninput = () => {
   document.getElementById("countTitle").innerText = titleInput.value.length + " / 30";
   document.getElementById("previewTitle").innerText = titleInput.value || "Título...";
@@ -166,17 +151,11 @@ msgInput.oninput = () => {
   document.getElementById("previewMsg").innerText = msgInput.value || "Mensagem...";
 };
 
-// 🚀 ENVIO
 async function sendPush() {
   const token = localStorage.getItem("token");
 
-  const title = titleInput.value.trim();
-  const body = msgInput.value.trim();
-
-  if (!title || !body) {
-    document.getElementById("status").innerText = "⚠️ Preencha título e mensagem";
-    return;
-  }
+  const title = titleInput.value;
+  const body = msgInput.value;
 
   try {
     const res = await fetch(API + "/send-push", {
@@ -216,13 +195,11 @@ async function sendPush() {
     document.getElementById("previewTitle").innerText = "Título...";
     document.getElementById("previewMsg").innerText = "Mensagem...";
 
-  } catch (error) {
+  } catch {
     document.getElementById("status").innerText = "❌ Erro de conexão";
-    console.error(error);
   }
 }
 
-// NAV
 function goHistorico() {
   window.location.href = "historico.html";
 }
@@ -233,7 +210,7 @@ function goStats() {
 
 function logout() {
   localStorage.removeItem("token");
-  window.location.href = "ativar.html";
+  window.location.href = "index.html";
 }
 </script>
 
