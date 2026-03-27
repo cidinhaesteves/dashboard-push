@@ -24,7 +24,7 @@ gap:20px;
 background:#1e293b;
 padding:20px;
 border-radius:10px;
-width:300px;
+width:320px;
 }
 
 input, textarea{
@@ -33,6 +33,12 @@ margin-top:10px;
 padding:10px;
 border-radius:5px;
 border:none;
+}
+
+.counter{
+text-align:right;
+font-size:12px;
+opacity:0.7;
 }
 
 button{
@@ -70,7 +76,10 @@ margin-top:10px;
 <h3>🚀 Push Dashboard</h3>
 
 <input id="titulo" placeholder="Título" maxlength="30">
+<div class="counter" id="countTitulo">0/30</div>
+
 <textarea id="mensagem" placeholder="Mensagem" maxlength="120"></textarea>
+<div class="counter" id="countMsg">0/120</div>
 
 <button class="enviar" onclick="enviar()">Enviar Push</button>
 <button class="sair" onclick="sair()">Sair</button>
@@ -99,13 +108,21 @@ const API = "https://api-push.onrender.com";
 const titulo = document.getElementById("titulo");
 const mensagem = document.getElementById("mensagem");
 
-titulo.oninput = () => document.getElementById("pTitulo").innerText = titulo.value;
-mensagem.oninput = () => document.getElementById("pMsg").innerText = mensagem.value;
+// contador
+titulo.oninput = () => {
+document.getElementById("pTitulo").innerText = titulo.value;
+document.getElementById("countTitulo").innerText = titulo.value.length + "/30";
+};
+
+mensagem.oninput = () => {
+document.getElementById("pMsg").innerText = mensagem.value;
+document.getElementById("countMsg").innerText = mensagem.value.length + "/120";
+};
 
 async function enviar(){
 try{
 
-const res = await fetch(API + "/send", {
+await fetch(API + "/send-push", {
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -115,8 +132,6 @@ title: titulo.value,
 message: mensagem.value
 })
 });
-
-const data = await res.json();
 
 alert("Enviado 🚀");
 
