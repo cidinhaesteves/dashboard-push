@@ -40,18 +40,16 @@ async function ativar() {
 
     console.log("✅ PERMISSÃO OK");
 
-    // 🔥 REGISTRA
     await navigator.serviceWorker.register("/firebase-messaging-sw.js");
 
     console.log("✅ SW REGISTRADO");
 
-    // 🔥 AGUARDA FICAR ATIVO (CORREÇÃO PRINCIPAL)
     const registration = await navigator.serviceWorker.ready;
 
     console.log("✅ SW ATIVO");
 
     const token = await getToken(messaging, {
-      vapidKey: "BL06_HAiVplmivWgja7ab0X4CaFV-OqMZ7riVUnkMt3Xywz-6HsCGmOsNWNATKX5c1xVD3d0WYfGa0uvxWwU",
+      vapidKey: "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw",
       serviceWorkerRegistration: registration
     });
 
