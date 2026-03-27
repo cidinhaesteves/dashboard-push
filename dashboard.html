@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
@@ -40,6 +41,12 @@ textarea {
   height: 100px;
 }
 
+.counter {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: right;
+}
+
 button {
   width: 100%;
   padding: 12px;
@@ -64,13 +71,11 @@ button {
   padding: 15px;
   border-radius: 10px;
   margin-top: 20px;
-
-  /* CORREÇÃO DO ESTOURO */
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
-
 </style>
+
 </head>
 
 <body>
@@ -78,34 +83,27 @@ button {
 <div class="container">
 
   <!-- FORM -->
+
   <div class="box">
     <h2>🚀 NEW PUSH</h2>
 
-    <input 
-      id="titulo" 
-      placeholder="Título (máx 30)" 
-      maxlength="30"
-    >
+```
+<input id="titulo" placeholder="Título (máx 30)" maxlength="30">
+<div class="counter" id="countTitulo">0 / 30</div>
 
-    <textarea 
-      id="mensagem" 
-      placeholder="Mensagem (máx 120)" 
-      maxlength="120"
-    ></textarea>
+<textarea id="mensagem" placeholder="Mensagem (máx 120)" maxlength="120"></textarea>
+<div class="counter" id="countMsg">0 / 120</div>
 
-    <button class="enviar" onclick="enviarPush()">
-      Enviar Push
-    </button>
+<button class="enviar" onclick="enviarPush()">Enviar Push</button>
+<button class="sair" onclick="logout()">Sair</button>
+```
 
-    <button class="sair" onclick="logout()">
-      Sair
-    </button>
   </div>
 
   <!-- PREVIEW -->
+
   <div class="box">
     <h2>📱 Preview</h2>
-
     <div class="preview">
       <strong id="previewTitulo">Título...</strong>
       <p id="previewMensagem">Mensagem...</p>
@@ -116,28 +114,28 @@ button {
 
 <script>
 
-// ======================
-// PREVIEW EM TEMPO REAL
-// ======================
-
+// ELEMENTOS
 const tituloInput = document.getElementById("titulo");
 const msgInput = document.getElementById("mensagem");
 
+// PREVIEW + CONTADOR
 tituloInput.addEventListener("input", () => {
   document.getElementById("previewTitulo").innerText =
     tituloInput.value || "Título...";
+
+  document.getElementById("countTitulo").innerText =
+    tituloInput.value.length + " / 30";
 });
 
 msgInput.addEventListener("input", () => {
   document.getElementById("previewMensagem").innerText =
     msgInput.value || "Mensagem...";
+
+  document.getElementById("countMsg").innerText =
+    msgInput.value.length + " / 120";
 });
 
-
-// ======================
 // ENVIAR PUSH
-// ======================
-
 async function enviarPush() {
   const titulo = tituloInput.value.trim();
   const mensagem = msgInput.value.trim();
@@ -148,7 +146,7 @@ async function enviarPush() {
   }
 
   try {
-    const res = await fetch("https://api-push.onrender.com/send", {
+    const res = await fetch("https://api-push.onrender.com/send-notification", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -156,15 +154,20 @@ async function enviarPush() {
       body: JSON.stringify({ titulo, mensagem })
     });
 
-    const data = await res.json();
+    const text = await res.text();
 
-    if (res.ok) {
-      alert("✅ Push enviado!");
-      tituloInput.value = "";
-      msgInput.value = "";
-    } else {
-      alert("Erro: " + data.error);
+    if (!res.ok) {
+      console.error("ERRO BACKEND:", text);
+      alert("Erro ao enviar ❌");
+      return;
     }
+
+    alert("✅ Push enviado com sucesso!");
+
+    tituloInput.value = "";
+    msgInput.value = "";
+    document.getElementById("countTitulo").innerText = "0 / 30";
+    document.getElementById("countMsg").innerText = "0 / 120";
 
   } catch (err) {
     alert("Erro de conexão ❌");
@@ -172,11 +175,7 @@ async function enviarPush() {
   }
 }
 
-
-// ======================
 // LOGOUT
-// ======================
-
 function logout() {
   localStorage.removeItem("logado");
   window.location.href = "index.html";
