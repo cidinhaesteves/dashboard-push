@@ -33,9 +33,15 @@ async function ativar() {
 
     console.log("INICIO ATIVAR");
 
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    // 🔥 REGISTRA
+    await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
-    console.log("SW OK");
+    console.log("SW REGISTRADO");
+
+    // 🔥 ESPERA FICAR ATIVO (CORREÇÃO CRÍTICA)
+    const registration = await navigator.serviceWorker.ready;
+
+    console.log("SW ATIVO");
 
     const permission = await Notification.requestPermission();
 
@@ -56,7 +62,6 @@ async function ativar() {
       return;
     }
 
-    // 🔥 SALVA SEPARADO (CORREÇÃO CRÍTICA)
     localStorage.setItem("pushToken", pushToken);
 
     await fetch("https://api-push.onrender.com/save-token", {
