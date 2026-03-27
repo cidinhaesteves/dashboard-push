@@ -18,7 +18,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCN0S5pMthAbPyC1LkYy-t2xFDoc8QuR8A",
   authDomain: "eco-goias.firebaseapp.com",
   projectId: "eco-goias",
-  storageBucket: "eco-goias.firebasestorage.app",
+  storageBucket: "eco-goias.appspot.com", // ✅ CORRIGIDO
   messagingSenderId: "31870991742",
   appId: "1:31870991742:web:2ea58294b93441b47c5d4f",
   measurementId: "G-RJVTCZ41QX"
@@ -34,7 +34,7 @@ try{
 // 🔥 REGISTRA SW
 await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
-// 🔥 AGUARDA ELE FICAR PRONTO (ESSENCIAL)
+// 🔥 AGUARDA ELE FICAR PRONTO
 const registration = await navigator.serviceWorker.ready;
 
 console.log("SW READY:", registration);
@@ -47,7 +47,7 @@ if (permission !== "granted") {
   return;
 }
 
-// 🔥 TOKEN (AGORA FUNCIONA)
+// 🔥 TOKEN
 const token = await messaging.getToken({
   vapidKey: "BDYA2CYQPxNKnJb1D80ULDUNrLv0Q4tFIC74-ZSkyvqt6VVJZtMiFhakg8_1iVQTmU4H37jh_57QKrzpQPiUMBM",
   serviceWorkerRegistration: registration
@@ -55,7 +55,7 @@ const token = await messaging.getToken({
 
 console.log("TOKEN:", token);
 
-// 🔥 SALVA
+// 🔥 SALVA LOCAL
 localStorage.setItem("token", token);
 
 // 🔥 ENVIA PRA API
