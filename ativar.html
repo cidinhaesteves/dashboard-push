@@ -10,70 +10,67 @@
 <h1>🔔 Ativar Notificações</h1>
 <button onclick="ativar()">Ativar Notificações</button>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
+<script type="module">
 
-<script>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCN0S5pMthAbPyC1LkYy-t2xFDoc8QuR8A",
   authDomain: "eco-goias.firebaseapp.com",
   projectId: "eco-goias",
-  storageBucket: "eco-goias.appspot.com", // ✅ CORRIGIDO
+  storageBucket: "eco-goias.appspot.com",
   messagingSenderId: "31870991742",
   appId: "1:31870991742:web:2ea58294b93441b47c5d4f",
   measurementId: "G-RJVTCZ41QX"
 };
 
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
-const messaging = firebase.messaging();
+window.ativar = async function () {
+  try {
 
-async function ativar(){
-try{
+    // 🔥 REGISTRA SERVICE WORKER
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
-// 🔥 REGISTRA SW
-await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    console.log("SW:", registration);
 
-// 🔥 AGUARDA ELE FICAR PRONTO
-const registration = await navigator.serviceWorker.ready;
+    // 🔥 PERMISSÃO
+    const permission = await Notification.requestPermission();
 
-console.log("SW READY:", registration);
+    if (permission !== "granted") {
+      alert("Permissão negada ❌");
+      return;
+    }
 
-// 🔥 PERMISSÃO
-const permission = await Notification.requestPermission();
+    // 🔥 TOKEN (SDK NOVO)
+    const token = await getToken(messaging, {
+      vapidKey: "BDYA2CYQPxNKnJb1D80ULDUNrLv0Q4tFIC74-ZSkyvqt6VVJZtMiFhakg8_1iVQTmU4H37jh_57QKrzpQPiUMBM",
+      serviceWorkerRegistration: registration
+    });
 
-if (permission !== "granted") {
-  alert("Permissão negada ❌");
-  return;
-}
+    console.log("TOKEN:", token);
 
-// 🔥 TOKEN
-const token = await messaging.getToken({
-  vapidKey: "BDYA2CYQPxNKnJb1D80ULDUNrLv0Q4tFIC74-ZSkyvqt6VVJZtMiFhakg8_1iVQTmU4H37jh_57QKrzpQPiUMBM",
-  serviceWorkerRegistration: registration
-});
+    localStorage.setItem("token", token);
 
-console.log("TOKEN:", token);
+    // 🔥 ENVIA PRA API
+    await fetch("https://api-push.onrender.com/save-token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ token })
+    });
 
-// 🔥 SALVA LOCAL
-localStorage.setItem("token", token);
+    alert("Notificações ativadas com sucesso 🚀");
 
-// 🔥 ENVIA PRA API
-await fetch("https://api-push.onrender.com/save-token", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ token })
-});
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao ativar notificações ❌");
+  }
+};
 
-alert("Notificações ativadas com sucesso 🚀");
-
-}catch(err){
-console.error(err);
-alert("Erro ao ativar notificações ❌");
-}
-}
 </script>
 
 </body>
