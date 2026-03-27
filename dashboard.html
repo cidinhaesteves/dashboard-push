@@ -6,38 +6,31 @@
 
 <style>
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: #fff;
+  background: #0f172a;
+  font-family: Arial;
+  color: white;
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
+  margin-top: 40px;
 }
 
 .container {
   display: flex;
-  gap: 20px;
+  gap: 40px;
 }
 
-.card {
+.box {
   background: #1e293b;
-  padding: 25px;
-  border-radius: 12px;
+  padding: 20px;
+  border-radius: 10px;
   width: 320px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
-}
-
-h2 {
-  margin-bottom: 15px;
 }
 
 input, textarea {
   width: 100%;
   padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 6px;
+  margin-top: 10px;
+  border-radius: 5px;
   border: none;
   outline: none;
 }
@@ -50,106 +43,107 @@ textarea {
 button {
   width: 100%;
   padding: 12px;
+  margin-top: 10px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
-  margin-top: 5px;
-  font-weight: bold;
 }
 
 .enviar {
   background: #22c55e;
-  color: #fff;
+  color: white;
 }
 
 .sair {
   background: #ef4444;
-  color: #fff;
-}
-
-.secundario {
-  background: #3b82f6;
-  color: #fff;
+  color: white;
 }
 
 .preview {
   background: #334155;
   padding: 15px;
-  border-radius: 8px;
-  min-height: 80px;
+  border-radius: 10px;
+  margin-top: 20px;
+
+  /* CORREÇÃO DO ESTOURO */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-small {
-  opacity: 0.6;
-}
 </style>
-
 </head>
 
 <body>
 
 <div class="container">
 
-  <!-- ENVIO -->
-  <div class="card">
+  <!-- FORM -->
+  <div class="box">
     <h2>🚀 NEW PUSH</h2>
 
-    <input id="titulo" placeholder="Título (máx 30)">
-    <small id="countTitulo">0/30</small>
+    <input 
+      id="titulo" 
+      placeholder="Título (máx 30)" 
+      maxlength="30"
+    >
 
-    <textarea id="mensagem" placeholder="Mensagem (máx 120)"></textarea>
-    <small id="countMsg">0/120</small>
+    <textarea 
+      id="mensagem" 
+      placeholder="Mensagem (máx 120)" 
+      maxlength="120"
+    ></textarea>
 
-    <button class="enviar" onclick="enviarPush()">Enviar Push</button>
+    <button class="enviar" onclick="enviarPush()">
+      Enviar Push
+    </button>
 
-    <button class="sair" onclick="logout()">Sair</button>
+    <button class="sair" onclick="logout()">
+      Sair
+    </button>
   </div>
 
   <!-- PREVIEW -->
-  <div class="card">
+  <div class="box">
     <h2>📱 Preview</h2>
 
     <div class="preview">
-      <strong id="prevTitulo">Título...</strong>
-      <p id="prevMsg">Mensagem...</p>
+      <strong id="previewTitulo">Título...</strong>
+      <p id="previewMensagem">Mensagem...</p>
     </div>
-
-    <button class="secundario" onclick="irHistorico()">📊 Histórico</button>
-    <button class="secundario" onclick="irEstatisticas()">📈 Estatísticas</button>
   </div>
 
 </div>
 
 <script>
 
-// 🔒 PROTEÇÃO
-const token = localStorage.getItem("token");
+// ======================
+// PREVIEW EM TEMPO REAL
+// ======================
 
-if (!token) {
-  window.location.href = "/index.html";
-}
-
-// 🔥 CONTADORES + PREVIEW
 const tituloInput = document.getElementById("titulo");
 const msgInput = document.getElementById("mensagem");
 
 tituloInput.addEventListener("input", () => {
-  document.getElementById("countTitulo").innerText = tituloInput.value.length + "/30";
-  document.getElementById("prevTitulo").innerText = tituloInput.value || "Título...";
+  document.getElementById("previewTitulo").innerText =
+    tituloInput.value || "Título...";
 });
 
 msgInput.addEventListener("input", () => {
-  document.getElementById("countMsg").innerText = msgInput.value.length + "/120";
-  document.getElementById("prevMsg").innerText = msgInput.value || "Mensagem...";
+  document.getElementById("previewMensagem").innerText =
+    msgInput.value || "Mensagem...";
 });
 
-// 🚀 ENVIAR PUSH
+
+// ======================
+// ENVIAR PUSH
+// ======================
+
 async function enviarPush() {
-  const titulo = tituloInput.value;
-  const mensagem = msgInput.value;
+  const titulo = tituloInput.value.trim();
+  const mensagem = msgInput.value.trim();
 
   if (!titulo || !mensagem) {
-    alert("Preencha todos os campos ❌");
+    alert("Preencha título e mensagem ❌");
     return;
   }
 
@@ -157,44 +151,35 @@ async function enviarPush() {
     const res = await fetch("https://api-push.onrender.com/send", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        titulo,
-        mensagem
-      })
+      body: JSON.stringify({ titulo, mensagem })
     });
 
     const data = await res.json();
 
     if (res.ok) {
-      alert("✅ Push enviado com sucesso!");
+      alert("✅ Push enviado!");
       tituloInput.value = "";
       msgInput.value = "";
     } else {
-      alert("Erro ao enviar ❌");
-      console.log(data);
+      alert("Erro: " + data.error);
     }
 
   } catch (err) {
     alert("Erro de conexão ❌");
+    console.error(err);
   }
 }
 
-// 🔓 LOGOUT
+
+// ======================
+// LOGOUT
+// ======================
+
 function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "/index.html";
-}
-
-// 🔗 LINKS FUTUROS
-function irHistorico() {
-  window.location.href = "/historico.html";
-}
-
-function irEstatisticas() {
-  window.location.href = "/estatisticas.html";
+  localStorage.removeItem("logado");
+  window.location.href = "index.html";
 }
 
 </script>
