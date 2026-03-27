@@ -16,7 +16,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCJzv86uRLFRAX1CBVejno1_89VD90J30Y",
+  apiKey: "AIzaSyCJzv86uRlFRAX1CBVejno1_89VD90J3OY",
   authDomain: "eco-goias.firebaseapp.com",
   projectId: "eco-goias",
   storageBucket: "eco-goias.firebasestorage.app",
@@ -40,11 +40,11 @@ async function ativar() {
 
     console.log("✅ PERMISSÃO OK");
 
-    await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
 
     console.log("✅ SW REGISTRADO");
 
-    const registration = await navigator.serviceWorker.ready;
+    await navigator.serviceWorker.ready;
 
     console.log("✅ SW ATIVO");
 
