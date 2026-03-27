@@ -18,7 +18,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCN0S5pMthAbPyC1LkYy-t2xFDoc8QuR8A",
   authDomain: "eco-goias.firebaseapp.com",
   projectId: "eco-goias",
-  storageBucket: "eco-goias.appspot.com",
+  storageBucket: "eco-goias.appspot.com", // 🔥 CORRIGIDO
   messagingSenderId: "31870991742",
   appId: "1:31870991742:web:2ea58294b93441b47c5d4f",
   measurementId: "G-RJVTCZ41QX"
@@ -33,12 +33,10 @@ async function ativar() {
 
     console.log("INICIO ATIVAR");
 
-    // 🔥 REGISTRA
     await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
     console.log("SW REGISTRADO");
 
-    // 🔥 ESPERA FICAR ATIVO (CORREÇÃO CRÍTICA)
     const registration = await navigator.serviceWorker.ready;
 
     console.log("SW ATIVO");
