@@ -35,14 +35,12 @@ h2, h3 {
   margin: 0 0 10px 0;
 }
 
-/* BRAND */
 .brand {
   font-size: 18px;
   color: #38bdf8;
   margin-bottom: 5px;
 }
 
-/* INPUTS */
 input, textarea {
   width: 100%;
   padding: 10px;
@@ -63,7 +61,6 @@ textarea {
   opacity: 0.7;
 }
 
-/* BOTÕES */
 button {
   width: 100%;
   padding: 12px;
@@ -72,18 +69,12 @@ button {
   border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
-  transition: 0.2s;
-}
-
-button:hover {
-  opacity: 0.9;
 }
 
 .btn-send { background: #22c55e; }
 .btn-history { background: #3b82f6; }
 .btn-exit { background: #ef4444; }
 
-/* PREVIEW */
 .preview-box {
   background: #334155;
   padding: 15px;
@@ -100,7 +91,6 @@ button:hover {
 
 #status {
   margin-top: 10px;
-  font-size: 14px;
 }
 </style>
 </head>
@@ -112,7 +102,6 @@ button:hover {
   <!-- ESQUERDA -->
   <div class="card">
 
-    <!-- 🚀 BRAND -->
     <div class="brand">🚀 NEW PUSH</div>
     <h2>Push Dashboard</h2>
 
@@ -153,16 +142,15 @@ const API = "https://api-push.onrender.com";
 const titleInput = document.getElementById("title");
 const msgInput = document.getElementById("message");
 
-// 🔐 PROTEÇÃO
+// 🔐 PROTEÇÃO DE ROTA (SEM LOOP)
 window.onload = () => {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    window.location.href = "index.html";
+    window.location.href = "ativar.html";
     return;
   }
 
-  // RESET INICIAL
   document.getElementById("previewTitle").innerText = "Título...";
   document.getElementById("previewMsg").innerText = "Mensagem...";
 };
@@ -207,7 +195,6 @@ async function sendPush() {
       return;
     }
 
-    // HISTÓRICO LOCAL
     let historico = JSON.parse(localStorage.getItem("historico")) || [];
 
     historico.push({
@@ -220,7 +207,6 @@ async function sendPush() {
 
     document.getElementById("status").innerText = "✅ Enviado com sucesso";
 
-    // LIMPAR
     titleInput.value = "";
     msgInput.value = "";
 
@@ -247,7 +233,7 @@ function goStats() {
 
 function logout() {
   localStorage.removeItem("token");
-  window.location.href = "index.html";
+  window.location.href = "ativar.html";
 }
 </script>
 
