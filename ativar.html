@@ -8,7 +8,7 @@
 <body>
 
 <h1>🔔 Ativar Notificações</h1>
-<button onclick="ativar()">Ativar Notificações</button>
+<button id="btnAtivar">Ativar Notificações</button>
 
 <script type="module">
 
@@ -45,7 +45,7 @@ async function ativar() {
     console.log("✅ SW REGISTRADO");
 
     const token = await getToken(messaging, {
-      vapidKey: "SUA_VAPID_KEY_AQUI",
+      vapidKey: "BL06_HAiVplmivWgja7ab0X4CaFV-OqMZ7riVUnkMt3Xywz-6HsCGmOsNWNATKX5c1xVD3d0WYfGa0uvxWwU",
       serviceWorkerRegistration: registration
     });
 
@@ -66,6 +66,9 @@ async function ativar() {
     alert("Erro ao ativar notificações ❌");
   }
 }
+
+// ✅ AQUI ESTÁ A CORREÇÃO
+document.getElementById("btnAtivar").addEventListener("click", ativar);
 
 </script>
 
