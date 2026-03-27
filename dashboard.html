@@ -58,6 +58,11 @@ background:#334155;
 padding:15px;
 border-radius:10px;
 margin-bottom:10px;
+
+/* 🔥 CORREÇÃO DO ESTOURO */
+word-wrap: break-word;
+word-break: break-word;
+overflow-wrap: break-word;
 }
 
 .link-btn{
@@ -122,7 +127,8 @@ document.getElementById("countMsg").innerText = mensagem.value.length + "/120";
 async function enviar(){
 try{
 
-await fetch(API + "/send-push", {
+// 🔥 IMPORTANTE: usar rota que FUNCIONAVA
+await fetch(API + "/send", {
 method:"POST",
 headers:{
 "Content-Type":"application/json"
