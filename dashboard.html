@@ -1,74 +1,106 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard</title>
+<title>Dashboard - NEW PUSH</title>
 
 <style>
-body{
-background:#0f172a;
-color:white;
-font-family:Arial;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.container{
-display:flex;
-gap:20px;
+.container {
+  display: flex;
+  gap: 30px;
 }
 
-.card{
-background:#1e293b;
-padding:20px;
-border-radius:10px;
-width:320px;
+.card {
+  background: #1e293b;
+  padding: 25px;
+  border-radius: 12px;
+  width: 320px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
 }
 
-input, textarea{
-width:100%;
-margin-top:10px;
-padding:10px;
-border-radius:5px;
-border:none;
+h2, h3 {
+  margin: 0 0 10px 0;
 }
 
-.counter{
-text-align:right;
-font-size:12px;
-opacity:0.7;
+/* BRAND */
+.brand {
+  font-size: 18px;
+  color: #38bdf8;
+  margin-bottom: 5px;
 }
 
-button{
-margin-top:10px;
-padding:10px;
-width:100%;
-border:none;
-border-radius:5px;
-cursor:pointer;
+/* INPUTS */
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
 }
 
-.enviar{ background:#22c55e; color:white; }
-.sair{ background:#ef4444; color:white; }
-
-.preview{
-background:#334155;
-padding:15px;
-border-radius:10px;
-margin-bottom:10px;
-
-/* 🔥 CORREÇÃO DO ESTOURO */
-word-wrap: break-word;
-word-break: break-word;
-overflow-wrap: break-word;
+textarea {
+  height: 120px;
+  resize: none;
 }
 
-.link-btn{
-background:#3b82f6;
-color:white;
-margin-top:10px;
+.counter {
+  font-size: 12px;
+  text-align: right;
+  opacity: 0.7;
+}
+
+/* BOTÕES */
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.btn-send { background: #22c55e; }
+.btn-history { background: #3b82f6; }
+.btn-exit { background: #ef4444; }
+
+/* PREVIEW */
+.preview-box {
+  background: #334155;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  min-height: 120px;
+}
+
+.section-buttons {
+  margin-top: 20px;
+}
+
+#status {
+  margin-top: 10px;
+  font-size: 14px;
 }
 </style>
 </head>
@@ -77,84 +109,146 @@ margin-top:10px;
 
 <div class="container">
 
-<div class="card">
-<h3>🚀 Push Dashboard</h3>
+  <!-- ESQUERDA -->
+  <div class="card">
 
-<input id="titulo" placeholder="Título" maxlength="30">
-<div class="counter" id="countTitulo">0/30</div>
+    <!-- 🚀 BRAND -->
+    <div class="brand">🚀 NEW PUSH</div>
+    <h2>Push Dashboard</h2>
 
-<textarea id="mensagem" placeholder="Mensagem" maxlength="120"></textarea>
-<div class="counter" id="countMsg">0/120</div>
+    <input id="title" maxlength="30" placeholder="Título">
+    <div class="counter" id="countTitle">0 / 30</div>
 
-<button class="enviar" onclick="enviar()">Enviar Push</button>
-<button class="sair" onclick="sair()">Sair</button>
-</div>
+    <textarea id="message" maxlength="120" placeholder="Mensagem"></textarea>
+    <div class="counter" id="countMsg">0 / 120</div>
 
-<div class="card">
-<h3>📱 Preview</h3>
+    <button class="btn-send" onclick="sendPush()">Enviar Push</button>
+    <button class="btn-exit" onclick="logout()">Sair</button>
 
-<div class="preview">
-<b id="pTitulo">Título...</b>
-<p id="pMsg">Mensagem...</p>
-</div>
+    <div id="status"></div>
+  </div>
 
-<button class="link-btn" onclick="ir('historico.html')">Histórico</button>
-<button class="link-btn" onclick="ir('estatisticas.html')">Estatísticas</button>
-<button class="link-btn" onclick="ir('agendamentos.html')">Agendamentos</button>
+  <!-- DIREITA -->
+  <div class="card">
+    <h3>📱 Preview</h3>
 
-</div>
+    <div class="preview-box">
+      <strong id="previewTitle">Título...</strong><br><br>
+      <span id="previewMsg">Mensagem...</span>
+    </div>
+
+    <div class="section-buttons">
+      <button class="btn-history" onclick="goHistorico()">📊 Histórico</button>
+      <button class="btn-history" onclick="goStats()">📈 Estatísticas</button>
+    </div>
+
+  </div>
 
 </div>
 
 <script>
-
 const API = "https://api-push.onrender.com";
 
-const titulo = document.getElementById("titulo");
-const mensagem = document.getElementById("mensagem");
+// ELEMENTOS
+const titleInput = document.getElementById("title");
+const msgInput = document.getElementById("message");
 
-// contador
-titulo.oninput = () => {
-document.getElementById("pTitulo").innerText = titulo.value;
-document.getElementById("countTitulo").innerText = titulo.value.length + "/30";
+// 🔐 PROTEÇÃO
+window.onload = () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  // RESET INICIAL
+  document.getElementById("previewTitle").innerText = "Título...";
+  document.getElementById("previewMsg").innerText = "Mensagem...";
 };
 
-mensagem.oninput = () => {
-document.getElementById("pMsg").innerText = mensagem.value;
-document.getElementById("countMsg").innerText = mensagem.value.length + "/120";
+// CONTADORES + PREVIEW
+titleInput.oninput = () => {
+  document.getElementById("countTitle").innerText = titleInput.value.length + " / 30";
+  document.getElementById("previewTitle").innerText = titleInput.value || "Título...";
 };
 
-async function enviar(){
-try{
+msgInput.oninput = () => {
+  document.getElementById("countMsg").innerText = msgInput.value.length + " / 120";
+  document.getElementById("previewMsg").innerText = msgInput.value || "Mensagem...";
+};
 
-// 🔥 IMPORTANTE: usar rota que FUNCIONAVA
-await fetch(API + "/send", {
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body: JSON.stringify({
-title: titulo.value,
-message: mensagem.value
-})
-});
+// 🚀 ENVIO
+async function sendPush() {
+  const token = localStorage.getItem("token");
 
-alert("Enviado 🚀");
+  const title = titleInput.value.trim();
+  const body = msgInput.value.trim();
 
-}catch(err){
-console.log(err);
-alert("Erro ao enviar push ❌");
+  if (!title || !body) {
+    document.getElementById("status").innerText = "⚠️ Preencha título e mensagem";
+    return;
+  }
+
+  try {
+    const res = await fetch(API + "/send-push", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, body })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      document.getElementById("status").innerText = "❌ " + (data.error || "Erro");
+      return;
+    }
+
+    // HISTÓRICO LOCAL
+    let historico = JSON.parse(localStorage.getItem("historico")) || [];
+
+    historico.push({
+      title,
+      body,
+      date: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("historico", JSON.stringify(historico));
+
+    document.getElementById("status").innerText = "✅ Enviado com sucesso";
+
+    // LIMPAR
+    titleInput.value = "";
+    msgInput.value = "";
+
+    document.getElementById("countTitle").innerText = "0 / 30";
+    document.getElementById("countMsg").innerText = "0 / 120";
+
+    document.getElementById("previewTitle").innerText = "Título...";
+    document.getElementById("previewMsg").innerText = "Mensagem...";
+
+  } catch (error) {
+    document.getElementById("status").innerText = "❌ Erro de conexão";
+    console.error(error);
+  }
 }
+
+// NAV
+function goHistorico() {
+  window.location.href = "historico.html";
 }
 
-function sair(){
-window.location.href = "index.html";
+function goStats() {
+  window.location.href = "estatisticas.html";
 }
 
-function ir(pagina){
-window.location.href = pagina;
+function logout() {
+  localStorage.removeItem("token");
+  window.location.href = "index.html";
 }
-
 </script>
 
 </body>
