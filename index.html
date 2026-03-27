@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard Push</title>
+<title>Login</title>
 
 <style>
 body {
@@ -16,70 +16,30 @@ body {
 }
 
 .container {
-  display: flex;
-  gap: 30px;
-}
-
-.card {
   background: #1e293b;
-  padding: 25px;
+  padding: 30px;
   border-radius: 12px;
-  width: 320px;
+  width: 300px;
   color: white;
-  display: flex;
-  flex-direction: column;
 }
 
-input, textarea {
+input {
   width: 100%;
   padding: 10px;
   margin-top: 10px;
   border-radius: 6px;
   border: none;
-  font-size: 14px;
-}
-
-textarea {
-  height: 120px;
-  resize: none;
-}
-
-.counter {
-  font-size: 12px;
-  text-align: right;
-  opacity: 0.7;
 }
 
 button {
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
+  margin-top: 15px;
+  background: #22c55e;
   border: none;
   border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
-}
-
-.btn-send { background: #22c55e; }
-.btn-history { background: #3b82f6; }
-.btn-exit { background: #ef4444; }
-
-.preview-box {
-  background: #334155;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 15px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  min-height: 120px;
-}
-
-.section-buttons {
-  margin-top: 20px;
-}
-
-#status {
-  margin-top: 10px;
 }
 </style>
 </head>
@@ -87,130 +47,51 @@ button {
 <body>
 
 <div class="container">
+  <h2>🔐 Login</h2>
 
-  <!-- ESQUERDA -->
-  <div class="card">
-    <h2>🚀 NEW PUSH</h2>
-    <h3>Push Dashboard</h3>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Senha">
 
-    <input id="title" maxlength="30" placeholder="Título">
-    <div class="counter" id="countTitle">0 / 30</div>
+  <button onclick="login()">Entrar</button>
 
-    <textarea id="message" maxlength="120" placeholder="Mensagem"></textarea>
-    <div class="counter" id="countMsg">0 / 120</div>
-
-    <button class="btn-send" onclick="sendPush()">Enviar Push</button>
-    <button class="btn-exit" onclick="logout()">Sair</button>
-
-    <div id="status"></div>
-  </div>
-
-  <!-- DIREITA -->
-  <div class="card">
-    <h3>📱 Preview</h3>
-
-    <div class="preview-box">
-      <strong id="previewTitle">Título...</strong><br><br>
-      <span id="previewMsg">Mensagem...</span>
-    </div>
-
-    <div class="section-buttons">
-      <button class="btn-history" onclick="goHistorico()">📊 Histórico</button>
-      <button class="btn-history" onclick="goStats()">📈 Estatísticas</button>
-    </div>
-
-  </div>
-
+  <div id="status"></div>
 </div>
 
 <script>
 const API = "https://api-push.onrender.com";
 
-const titleInput = document.getElementById("title");
-const msgInput = document.getElementById("message");
-
+// 🔒 SE JÁ ESTÁ LOGADO → VAI PRO DASHBOARD
 window.onload = () => {
   const token = localStorage.getItem("token");
 
-  if (!token) {
-    window.location.href = "index.html";
-    return;
+  if (token) {
+    window.location.href = "dashboard.html";
   }
-
-  document.getElementById("previewTitle").innerText = "Título...";
-  document.getElementById("previewMsg").innerText = "Mensagem...";
 };
 
-titleInput.oninput = () => {
-  document.getElementById("countTitle").innerText = titleInput.value.length + " / 30";
-  document.getElementById("previewTitle").innerText = titleInput.value || "Título...";
-};
-
-msgInput.oninput = () => {
-  document.getElementById("countMsg").innerText = msgInput.value.length + " / 120";
-  document.getElementById("previewMsg").innerText = msgInput.value || "Mensagem...";
-};
-
-async function sendPush() {
-  const token = localStorage.getItem("token");
-
-  const title = titleInput.value;
-  const body = msgInput.value;
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
   try {
-    const res = await fetch(API + "/send-push", {
+    const res = await fetch(API + "/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify({ title, body })
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ email, password })
     });
 
     const data = await res.json();
 
-    if (!res.ok) {
-      document.getElementById("status").innerText = "❌ " + (data.error || "Erro");
-      return;
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      window.location.href = "dashboard.html";
+    } else {
+      document.getElementById("status").innerText = "❌ Login inválido";
     }
-
-    let historico = JSON.parse(localStorage.getItem("historico")) || [];
-
-    historico.push({
-      title,
-      body,
-      date: new Date().toLocaleString()
-    });
-
-    localStorage.setItem("historico", JSON.stringify(historico));
-
-    document.getElementById("status").innerText = "✅ Enviado com sucesso";
-
-    titleInput.value = "";
-    msgInput.value = "";
-
-    document.getElementById("countTitle").innerText = "0 / 30";
-    document.getElementById("countMsg").innerText = "0 / 120";
-
-    document.getElementById("previewTitle").innerText = "Título...";
-    document.getElementById("previewMsg").innerText = "Mensagem...";
 
   } catch {
     document.getElementById("status").innerText = "❌ Erro de conexão";
   }
-}
-
-function goHistorico() {
-  window.location.href = "historico.html";
-}
-
-function goStats() {
-  window.location.href = "estatisticas.html";
-}
-
-function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "index.html";
 }
 </script>
 
