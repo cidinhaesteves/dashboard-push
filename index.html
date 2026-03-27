@@ -2,49 +2,69 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>NEW PUSH</title>
-
-<style>
-body{
-background:#0f172a;
-color:white;
-font-family:Arial;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.card{
-background:#1e293b;
-padding:30px;
-border-radius:10px;
-text-align:center;
-}
-
-button{
-padding:10px 20px;
-background:#22c55e;
-border:none;
-color:white;
-cursor:pointer;
-border-radius:5px;
-}
-</style>
+<title>Ativar Notificações</title>
 </head>
 
 <body>
 
-<div class="card">
-<h1>🚀 NEW PUSH</h1>
-<p>Sistema pronto</p>
-<button onclick="entrar()">Entrar</button>
-</div>
+<h2>🔔 Ativar Notificações</h2>
+<button onclick="ativar()">Ativar Notificações</button>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 
 <script>
-function entrar(){
-localStorage.setItem("token","ok");
-window.location.href = "dashboard.html";
+const firebaseConfig = {
+  apiKey: "AIzaSyCN0S5pMthAbPyC1LkYy-t2xFDoc8QuR8A",
+  authDomain: "eco-goias.firebaseapp.com",
+  projectId: "eco-goias",
+  storageBucket: "eco-goias.firebasestorage.app",
+  messagingSenderId: "31870991742",
+  appId: "1:31870991742:web:2ea58294b93441b47c5d4f",
+  measurementId: "G-RJVTCZ41QX"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const messaging = firebase.messaging();
+
+async function ativar(){
+  try{
+
+    const permission = await Notification.requestPermission();
+
+    if(permission !== "granted"){
+      alert("Permissão negada ❌");
+      return;
+    }
+
+    const token = await messaging.getToken({
+      vapidKey: "BKI6k6cCuVOpV5TaOUWdkzFO_HarurjzGU-FGggjhp3zWeWxN3YKpPs5FCObtZ5kyUwk5WrOfttBRrgO6gRnKE"
+    });
+
+    console.log("TOKEN GERADO:", token);
+
+    if(!token){
+      alert("Erro ao gerar token ❌");
+      return;
+    }
+
+    localStorage.setItem("token", token);
+
+    await fetch("https://api-push.onrender.com/save-token",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify({ token })
+    });
+
+    alert("Token salvo com sucesso 🚀");
+
+  }catch(err){
+    console.error(err);
+    alert("Erro ao ativar notificações ❌");
+  }
 }
 </script>
 
