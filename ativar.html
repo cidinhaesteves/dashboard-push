@@ -8,7 +8,7 @@
 <body>
 
 <h1>🔔 Ativar Notificações</h1>
-<button onclick="ativar()">Ativar Notificações</button>
+<button id="btn">Ativar Notificações</button>
 
 <script type="module">
 
@@ -28,24 +28,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-window.ativar = async function () {
+async function ativar() {
   try {
 
-    // 🔥 REGISTRA SERVICE WORKER
+    console.log("INICIO ATIVAR");
+
     const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
-    // 🔥 AGUARDA ATIVAÇÃO
     await navigator.serviceWorker.ready;
 
-    // 🔥 GARANTE CONTROLE DA PÁGINA
-    if (!navigator.serviceWorker.controller) {
-      location.reload();
-      return;
-    }
+    console.log("SW OK");
 
-    console.log("SW ATIVO:", registration);
-
-    // 🔥 PERMISSÃO
     const permission = await Notification.requestPermission();
 
     if (permission !== "granted") {
@@ -53,7 +46,6 @@ window.ativar = async function () {
       return;
     }
 
-    // 🔥 TOKEN
     const token = await getToken(messaging, {
       vapidKey: "BDYA2CYQPxNKnJb1D80ULDUNrLv0Q4tFIC74-ZSkyvqt6VVJZtMiFhakg8_1iVQTmU4H37jh_57QKrzpQPiUMBM",
       serviceWorkerRegistration: registration
@@ -66,10 +58,8 @@ window.ativar = async function () {
       return;
     }
 
-    // 🔥 SALVA LOCAL
     localStorage.setItem("token", token);
 
-    // 🔥 ENVIA PRA API
     await fetch("https://api-push.onrender.com/save-token", {
       method: "POST",
       headers: {
@@ -81,10 +71,13 @@ window.ativar = async function () {
     alert("Notificações ativadas com sucesso 🚀");
 
   } catch (err) {
-    console.error("ERRO COMPLETO:", err);
+    console.error("ERRO:", err);
     alert("Erro ao ativar notificações ❌");
   }
-};
+}
+
+// 🔥 LIGA O BOTÃO CORRETAMENTE
+document.getElementById("btn").addEventListener("click", ativar);
 
 </script>
 
