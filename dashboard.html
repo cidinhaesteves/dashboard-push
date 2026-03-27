@@ -105,7 +105,7 @@ mensagem.oninput = () => document.getElementById("pMsg").innerText = mensagem.va
 async function enviar(){
 try{
 
-const res = await fetch(API + "/send", {   // 🔥 CORRIGIDO AQUI
+const res = await fetch(API + "/send", {
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -116,14 +116,12 @@ message: mensagem.value
 })
 });
 
-if(!res.ok){
-throw new Error("Erro no envio");
-}
+const data = await res.json();
 
 alert("Enviado 🚀");
 
 }catch(err){
-console.error(err);
+console.log(err);
 alert("Erro ao enviar push ❌");
 }
 }
