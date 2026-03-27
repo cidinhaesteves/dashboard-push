@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <title>Ativar Notificações</title>
@@ -10,36 +10,26 @@
 <h1>🔔 Ativar Notificações</h1>
 <button onclick="ativar()">Ativar Notificações</button>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
+<script type="module">
 
-<script>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyCN0S5pMthAbPyC1LkYy-t2xFDoc8QuR8A",
+  apiKey: "AIzaSyCJzv86uRLFRAX1CBVejno1_89VD90J30Y",
   authDomain: "eco-goias.firebaseapp.com",
   projectId: "eco-goias",
-  storageBucket: "eco-goias.appspot.com", // 🔥 CORRIGIDO
-  messagingSenderId: "31870991742",
-  appId: "1:31870991742:web:2ea58294b93441b47c5d4f",
-  measurementId: "G-RJVTCZ41QX"
+  storageBucket: "eco-goias.firebasestorage.app",
+  messagingSenderId: "31870091742",
+  appId: "1:31870091742:web:f75d7509b351bfac7c5d4f"
 };
 
-firebase.initializeApp(firebaseConfig);
-
-const messaging = firebase.messaging();
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
 async function ativar() {
   try {
-
-    console.log("INICIO ATIVAR");
-
-    await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-
-    console.log("SW REGISTRADO");
-
-    const registration = await navigator.serviceWorker.ready;
-
-    console.log("SW ATIVO");
+    console.log("🚀 INICIO ATIVAR");
 
     const permission = await Notification.requestPermission();
 
@@ -48,35 +38,35 @@ async function ativar() {
       return;
     }
 
-    const pushToken = await messaging.getToken({
-      vapidKey: "BDYA2CYQPxNKnJb1D80ULDUNrLv0Q4tFIC74-ZSkyvqt6VVJZtMiFhakg8_1iVQTmU4H37jh_57QKrzpQPiUMBM",
+    console.log("✅ PERMISSÃO OK");
+
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
+    console.log("✅ SW REGISTRADO");
+
+    const token = await getToken(messaging, {
+      vapidKey: "SUA_VAPID_KEY_AQUI",
       serviceWorkerRegistration: registration
     });
 
-    console.log("PUSH TOKEN:", pushToken);
-
-    if (!pushToken) {
-      alert("Erro ao gerar token ❌");
-      return;
-    }
-
-    localStorage.setItem("pushToken", pushToken);
+    console.log("🔥 TOKEN:", token);
 
     await fetch("https://api-push.onrender.com/save-token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ token: pushToken })
+      body: JSON.stringify({ token })
     });
 
-    alert("Notificações ativadas com sucesso 🚀");
+    alert("✅ Notificações ativadas com sucesso!");
 
-  } catch (err) {
-    console.error("ERRO COMPLETO:", err);
+  } catch (error) {
+    console.error("❌ ERRO COMPLETO:", error);
     alert("Erro ao ativar notificações ❌");
   }
 }
+
 </script>
 
 </body>
