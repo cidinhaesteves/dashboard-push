@@ -8,15 +8,14 @@
 <body>
 
 <h1>🔔 Ativar Notificações</h1>
-<button id="btn">Ativar Notificações</button>
+<button onclick="ativar()">Ativar Notificações</button>
 
-<script type="module">
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
-
+<script>
 const firebaseConfig = {
-  apiKey: "AIzaSyCwisTzYQg8gSTcK3GL1vMjJpCpdXyn4fs", // ✅ NOVA KEY
+  apiKey: "AIzaSyCN0S5pMthAbPyC1LkYy-t2xFDoc8QuR8A",
   authDomain: "eco-goias.firebaseapp.com",
   projectId: "eco-goias",
   storageBucket: "eco-goias.appspot.com",
@@ -25,8 +24,9 @@ const firebaseConfig = {
   measurementId: "G-RJVTCZ41QX"
 };
 
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+firebase.initializeApp(firebaseConfig);
+
+const messaging = firebase.messaging();
 
 async function ativar() {
   try {
@@ -34,8 +34,6 @@ async function ativar() {
     console.log("INICIO ATIVAR");
 
     const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-
-    await navigator.serviceWorker.ready;
 
     console.log("SW OK");
 
@@ -46,26 +44,27 @@ async function ativar() {
       return;
     }
 
-    const token = await getToken(messaging, {
+    const pushToken = await messaging.getToken({
       vapidKey: "BDYA2CYQPxNKnJb1D80ULDUNrLv0Q4tFIC74-ZSkyvqt6VVJZtMiFhakg8_1iVQTmU4H37jh_57QKrzpQPiUMBM",
       serviceWorkerRegistration: registration
     });
 
-    console.log("TOKEN:", token);
+    console.log("PUSH TOKEN:", pushToken);
 
-    if (!token) {
+    if (!pushToken) {
       alert("Erro ao gerar token ❌");
       return;
     }
 
-    localStorage.setItem("token", token);
+    // 🔥 SALVA SEPARADO (CORREÇÃO CRÍTICA)
+    localStorage.setItem("pushToken", pushToken);
 
     await fetch("https://api-push.onrender.com/save-token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ token })
+      body: JSON.stringify({ token: pushToken })
     });
 
     alert("Notificações ativadas com sucesso 🚀");
@@ -75,9 +74,6 @@ async function ativar() {
     alert("Erro ao ativar notificações ❌");
   }
 }
-
-document.getElementById("btn").addEventListener("click", ativar);
-
 </script>
 
 </body>
