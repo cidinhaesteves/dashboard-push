@@ -45,22 +45,20 @@ Total enviados: <span id="total">...</span>
 <script>
 const API = "https://api-push.onrender.com";
 
-// 🔥 PEGAR TOKEN
-const token = localStorage.getItem("token");
-
 // 🔥 BUSCAR DADOS
 async function load(){
 try{
 
 const res = await fetch(API + "/stats",{
 headers:{
-Authorization: "Bearer " + token
+Authorization: "123" // ✅ CORREÇÃO AQUI
 }
 });
 
 const data = await res.json();
 
-document.getElementById("total").innerText = data.total;
+// 🔥 GARANTIA EXTRA
+document.getElementById("total").innerText = data.total ?? 0;
 
 }catch(err){
 console.log(err);
