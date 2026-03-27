@@ -135,7 +135,7 @@ msgInput.addEventListener("input", () => {
     msgInput.value.length + " / 120";
 });
 
-// ENVIAR PUSH
+// ENVIAR PUSH (CORRIGIDO PARA /send)
 async function enviarPush() {
   const titulo = tituloInput.value.trim();
   const mensagem = msgInput.value.trim();
@@ -146,7 +146,7 @@ async function enviarPush() {
   }
 
   try {
-    const res = await fetch("https://api-push.onrender.com/send-notification", {
+    const res = await fetch("https://api-push.onrender.com/send", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -166,6 +166,7 @@ async function enviarPush() {
 
     tituloInput.value = "";
     msgInput.value = "";
+
     document.getElementById("countTitulo").innerText = "0 / 30";
     document.getElementById("countMsg").innerText = "0 / 120";
 
