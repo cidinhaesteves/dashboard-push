@@ -2,68 +2,63 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard - New Push</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  color: white;
+body{
+background:#0f172a;
+color:white;
+font-family:Arial;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
 }
 
-.container {
-  display: flex;
-  gap: 30px;
+.container{
+display:flex;
+gap:20px;
 }
 
-.box {
-  background: #1e293b;
-  padding: 25px;
-  border-radius: 12px;
-  width: 320px;
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:10px;
+width:300px;
 }
 
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  margin-bottom: 5px;
+input, textarea{
+width:100%;
+margin-top:10px;
+padding:10px;
+border-radius:5px;
+border:none;
 }
 
-.counter {
-  font-size: 12px;
-  text-align: right;
-  margin-bottom: 10px;
-  opacity: 0.7;
+button{
+margin-top:10px;
+padding:10px;
+width:100%;
+border:none;
+border-radius:5px;
+cursor:pointer;
 }
 
-.preview {
-  background: #334155;
-  padding: 15px;
-  border-radius: 10px;
-  word-wrap: break-word;
+.enviar{ background:#22c55e; color:white; }
+.sair{ background:#ef4444; color:white; }
+
+.preview{
+background:#334155;
+padding:15px;
+border-radius:10px;
+margin-bottom:10px;
 }
 
-button {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  margin-bottom: 10px;
-  font-weight: bold;
-  cursor: pointer;
+.link-btn{
+background:#3b82f6;
+color:white;
+margin-top:10px;
 }
-
-.send { background: #22c55e; }
-.logout { background: #ef4444; }
-.nav { background: #3b82f6; }
 </style>
 </head>
 
@@ -71,82 +66,76 @@ button {
 
 <div class="container">
 
-<div class="box">
+<div class="card">
 <h3>🚀 Push Dashboard</h3>
 
-<input id="title" maxlength="30" placeholder="Título" oninput="updatePreview()">
-<div class="counter" id="titleCount">0/30</div>
+<input id="titulo" placeholder="Título" maxlength="30">
+<textarea id="mensagem" placeholder="Mensagem" maxlength="120"></textarea>
 
-<textarea id="body" maxlength="120" placeholder="Mensagem" oninput="updatePreview()"></textarea>
-<div class="counter" id="bodyCount">0/120</div>
-
-<button class="send" onclick="send()">Enviar Push</button>
-<button class="logout" onclick="logout()">Sair</button>
+<button class="enviar" onclick="enviar()">Enviar Push</button>
+<button class="sair" onclick="sair()">Sair</button>
 </div>
 
-<div class="box">
+<div class="card">
 <h3>📱 Preview</h3>
 
 <div class="preview">
-<strong id="pTitle">Título...</strong>
-<p id="pBody">Mensagem...</p>
+<b id="pTitulo">Título...</b>
+<p id="pMsg">Mensagem...</p>
 </div>
 
-<button class="nav" onclick="go('historico.html')">Histórico</button>
-<button class="nav" onclick="go('estatisticas.html')">Estatísticas</button>
-<button class="nav" onclick="go('agendamentos.html')">Agendamentos</button>
+<button class="link-btn" onclick="ir('historico.html')">Histórico</button>
+<button class="link-btn" onclick="ir('estatisticas.html')">Estatísticas</button>
+<button class="link-btn" onclick="ir('agendamentos.html')">Agendamentos</button>
 
 </div>
 
 </div>
 
 <script>
+
 const API = "https://api-push.onrender.com";
-const token = localStorage.getItem("token");
 
-if (!token) window.location.href = "index.html";
+const titulo = document.getElementById("titulo");
+const mensagem = document.getElementById("mensagem");
 
-function updatePreview() {
-  const t = title.value;
-  const b = body.value;
+titulo.oninput = () => document.getElementById("pTitulo").innerText = titulo.value;
+mensagem.oninput = () => document.getElementById("pMsg").innerText = mensagem.value;
 
-  pTitle.innerText = t || "Título...";
-  pBody.innerText = b || "Mensagem...";
+async function enviar(){
+try{
 
-  titleCount.innerText = t.length + "/30";
-  bodyCount.innerText = b.length + "/120";
+const res = await fetch(API + "/send", {   // 🔥 CORRIGIDO AQUI
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify({
+title: titulo.value,
+message: mensagem.value
+})
+});
+
+if(!res.ok){
+throw new Error("Erro no envio");
 }
 
-async function send() {
-  await fetch(API + "/send-push", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({
-      title: title.value,
-      body: body.value
-    })
-  });
+alert("Enviado 🚀");
 
-  title.value = "";
-  body.value = "";
-  updatePreview();
-
-  alert("Enviado 🚀");
+}catch(err){
+console.error(err);
+alert("Erro ao enviar push ❌");
+}
 }
 
-function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "index.html";
+function sair(){
+window.location.href = "index.html";
 }
 
-function go(p) {
-  window.location.href = p;
+function ir(pagina){
+window.location.href = pagina;
 }
 
-updatePreview();
 </script>
 
 </body>
