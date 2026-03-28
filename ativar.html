@@ -16,32 +16,27 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_DOMINIO",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_BUCKET",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "AIzaSyCN05SpMfHAbPyCl1kYy-t2xFDoc8QuR8A",
+  authDomain: "eco-goias.firebaseapp.com",
+  projectId: "eco-goias",
+  storageBucket: "eco-goias.firebasestorage.app",
+  messagingSenderId: "31870091742",
+  appId: "1:31870091742:web:2ea58294b93441b47c5d4f"
 };
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// 🔥 FUNÇÃO PARA CORRIGIR BASE64 (ESSENCIAL)
-function urlBase64ToUint8Array(base64String) {
-  const padding = "=".repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
-
-  const rawData = window.atob(base64);
-  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
-}
-
 window.ativar = async function () {
   try {
     console.log("🚀 INICIANDO");
 
+    // 🔥 1. REGISTRAR SERVICE WORKER (ESSENCIAL)
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
+    console.log("✅ SW REGISTRADO:", registration);
+
+    // 🔥 2. PERMISSÃO
     const permission = await Notification.requestPermission();
 
     if (permission !== "granted") {
@@ -51,14 +46,15 @@ window.ativar = async function () {
 
     console.log("✅ PERMISSÃO OK");
 
-    const vapidKey = "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw";
-
+    // 🔥 3. GERAR TOKEN
     const token = await getToken(messaging, {
-      vapidKey: vapidKey
+      vapidKey: "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw",
+      serviceWorkerRegistration: registration
     });
 
     console.log("🔥 TOKEN:", token);
 
+    // 🔥 4. ENVIAR TOKEN PRO BACKEND
     await fetch("https://api-push.onrender.com/save-token", {
       method: "POST",
       headers: {
