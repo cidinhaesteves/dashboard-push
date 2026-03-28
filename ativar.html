@@ -31,12 +31,17 @@ window.ativar = async function () {
   try {
     console.log("🚀 INICIANDO");
 
-    // 🔥 1. REGISTRAR SERVICE WORKER (ESSENCIAL)
+    // 🔥 REGISTRAR SW
     const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
 
-    console.log("✅ SW REGISTRADO:", registration);
+    console.log("🟡 SW REGISTRADO:", registration);
 
-    // 🔥 2. PERMISSÃO
+    // 🔥 AGUARDAR SW FICAR ATIVO (CORREÇÃO FINAL)
+    await navigator.serviceWorker.ready;
+
+    console.log("✅ SW ATIVO");
+
+    // 🔥 PERMISSÃO
     const permission = await Notification.requestPermission();
 
     if (permission !== "granted") {
@@ -46,7 +51,7 @@ window.ativar = async function () {
 
     console.log("✅ PERMISSÃO OK");
 
-    // 🔥 3. GERAR TOKEN
+    // 🔥 GERAR TOKEN
     const token = await getToken(messaging, {
       vapidKey: "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw",
       serviceWorkerRegistration: registration
@@ -54,7 +59,7 @@ window.ativar = async function () {
 
     console.log("🔥 TOKEN:", token);
 
-    // 🔥 4. ENVIAR TOKEN PRO BACKEND
+    // 🔥 SALVAR TOKEN
     await fetch("https://api-push.onrender.com/save-token", {
       method: "POST",
       headers: {
