@@ -16,12 +16,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCN05SpMfHAbPyCl1kYy-t2xFDoc8QuR8A",
+  apiKey: "AIzaSyCJzv86uRlFRAX1CBVejno1_89VD90J3OY",
   authDomain: "eco-goias.firebaseapp.com",
   projectId: "eco-goias",
-  storageBucket: "eco-goias.appspot.com",
+  storageBucket: "eco-goias.firebasestorage.app",
   messagingSenderId: "31870091742",
-  appId: "1:31870091742:web:2ea58294b93441b47c5d4f"
+  appId: "1:31870091742:web:f75d7509b351bfac7c5d4f",
+  measurementId: "G-G286HDQQJZ"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -30,6 +31,16 @@ const messaging = getMessaging(app);
 window.ativar = async function () {
   try {
     console.log("🚀 INICIANDO");
+
+    // 🔥 REGISTRA O SERVICE WORKER CORRETAMENTE
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
+    console.log("✅ SW REGISTRADO");
+
+    // 🔥 GARANTE QUE ELE ESTÁ ATIVO
+    await navigator.serviceWorker.ready;
+
+    console.log("✅ SW ATIVO");
 
     const permission = await Notification.requestPermission();
 
@@ -40,18 +51,8 @@ window.ativar = async function () {
 
     console.log("✅ PERMISSÃO OK");
 
-    // 🔥 REGISTRA SERVICE WORKER
-    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-    console.log("✅ SW REGISTRADO");
-
-    // 🔥 ESPERA ELE FICAR ATIVO (ESSA LINHA É O SEGREDO)
-    await navigator.serviceWorker.ready;
-    console.log("✅ SW ATIVO");
-
-    const vapidKey = "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw";
-
     const token = await getToken(messaging, {
-      vapidKey: vapidKey,
+      vapidKey: "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw",
       serviceWorkerRegistration: registration
     });
 
