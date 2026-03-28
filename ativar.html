@@ -27,6 +27,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
+// 🔥 FUNÇÃO PARA CORRIGIR BASE64 (ESSENCIAL)
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
+
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+}
+
 window.ativar = async function () {
   try {
     console.log("🚀 INICIANDO");
@@ -40,13 +51,14 @@ window.ativar = async function () {
 
     console.log("✅ PERMISSÃO OK");
 
+    const vapidKey = "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw";
+
     const token = await getToken(messaging, {
-      vapidKey: "SUA_VAPID_KEY"
+      vapidKey: vapidKey
     });
 
     console.log("🔥 TOKEN:", token);
 
-    // 🚀 ENVIA TOKEN PRO BACKEND
     await fetch("https://api-push.onrender.com/save-token", {
       method: "POST",
       headers: {
@@ -58,7 +70,7 @@ window.ativar = async function () {
     alert("✅ Notificações ativadas com sucesso!");
 
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERRO COMPLETO:", err);
     alert("Erro ao ativar notificações");
   }
 };
