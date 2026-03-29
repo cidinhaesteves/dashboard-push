@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -21,8 +20,7 @@ const firebaseConfig = {
   projectId: "eco-goias",
   storageBucket: "eco-goias.firebasestorage.app",
   messagingSenderId: "31870091742",
-  appId: "1:31870091742:web:f75d7509b351bfac7c5d4f",
-  measurementId: "G-G286HDQQJZ"
+  appId: "1:31870091742:web:f75d7509b351bfac7c5d4f"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -31,16 +29,6 @@ const messaging = getMessaging(app);
 window.ativar = async function () {
   try {
     console.log("🚀 INICIANDO");
-
-    // 🔥 REGISTRA O SERVICE WORKER CORRETAMENTE
-    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-
-    console.log("✅ SW REGISTRADO");
-
-    // 🔥 GARANTE QUE ELE ESTÁ ATIVO
-    await navigator.serviceWorker.ready;
-
-    console.log("✅ SW ATIVO");
 
     const permission = await Notification.requestPermission();
 
@@ -51,9 +39,16 @@ window.ativar = async function () {
 
     console.log("✅ PERMISSÃO OK");
 
+    // 🔥 REGISTRO MANUAL DO SERVICE WORKER (ESSENCIAL)
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
+    console.log("✅ SW REGISTRADO:", registration);
+
+    const vapidKey = "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw";
+
     const token = await getToken(messaging, {
-      vapidKey: "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw",
-      serviceWorkerRegistration: registration
+      vapidKey: vapidKey,
+      serviceWorkerRegistration: registration // 🔥 ESSA LINHA RESOLVE TUDO
     });
 
     console.log("🔥 TOKEN:", token);
@@ -66,7 +61,7 @@ window.ativar = async function () {
       body: JSON.stringify({ token })
     });
 
-    alert("✅ Notificações ativadas com sucesso!");
+    alert("✅ Notificações ativadas!");
 
   } catch (err) {
     console.error("❌ ERRO COMPLETO:", err);
