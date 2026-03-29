@@ -12,24 +12,15 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 🔥 ESSENCIAL — RECEBER PUSH
-self.addEventListener("push", function (event) {
-  console.log("🔥 PUSH RECEBIDO:", event);
+// 🔥 CORRETO PARA FIREBASE
+messaging.onBackgroundMessage(function (payload) {
+  console.log("🔥 BACKGROUND MESSAGE:", payload);
 
-  if (!event.data) return;
+  const title = payload.data?.title || "Nova notificação";
+  const body = payload.data?.body || "Mensagem recebida";
 
-  const data = event.data.json();
-
-  const title = data.title || "Nova notificação";
-  const body = data.body || "Você recebeu uma mensagem";
-
-  const options = {
+  self.registration.showNotification(title, {
     body: body,
-    icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png",
-    badge: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
+    icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
+  });
 });
