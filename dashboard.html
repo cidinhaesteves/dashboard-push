@@ -19,20 +19,27 @@ body {
   background: #1e293b;
   padding: 20px;
   border-radius: 10px;
-  width: 300px;
+  width: 320px;
 }
 
 input, textarea {
   width: 100%;
   padding: 10px;
-  margin: 10px 0;
+  margin-top: 10px;
   border-radius: 5px;
   border: none;
+  font-size: 14px;
+}
+
+.counter {
+  font-size: 12px;
+  text-align: right;
+  color: #94a3b8;
 }
 
 button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-top: 10px;
   border: none;
   border-radius: 5px;
@@ -54,6 +61,10 @@ button {
   padding: 15px;
   border-radius: 10px;
   min-height: 150px;
+
+  /* 🔥 CORREÇÃO IMPORTANTE */
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 </style>
 </head>
@@ -64,7 +75,10 @@ button {
   <h3>🚀 NEW PUSH</h3>
 
   <input id="titulo" maxlength="30" placeholder="Título (máx 30)">
+  <div class="counter" id="countTitulo">0 / 30</div>
+
   <textarea id="mensagem" maxlength="120" placeholder="Mensagem (máx 120)"></textarea>
+  <div class="counter" id="countMsg">0 / 120</div>
 
   <button class="enviar" onclick="enviarPush()">Enviar Push</button>
   <button class="sair" onclick="logout()">Sair</button>
@@ -72,7 +86,7 @@ button {
 
 <div class="box">
   <h3>📱 Preview</h3>
-  <div class="preview" id="preview">
+  <div class="preview">
     <strong id="prevTitulo"></strong>
     <p id="prevMsg"></p>
   </div>
@@ -81,25 +95,40 @@ button {
 <script>
 
 // ==============================
-// PREVIEW EM TEMPO REAL
+// ELEMENTOS
 // ==============================
-document.getElementById("titulo").addEventListener("input", atualizarPreview);
-document.getElementById("mensagem").addEventListener("input", atualizarPreview);
+const tituloInput = document.getElementById("titulo");
+const msgInput = document.getElementById("mensagem");
 
-function atualizarPreview() {
-  document.getElementById("prevTitulo").innerText =
-    document.getElementById("titulo").value;
+const prevTitulo = document.getElementById("prevTitulo");
+const prevMsg = document.getElementById("prevMsg");
 
-  document.getElementById("prevMsg").innerText =
-    document.getElementById("mensagem").value;
+const countTitulo = document.getElementById("countTitulo");
+const countMsg = document.getElementById("countMsg");
+
+// ==============================
+// ATUALIZAR PREVIEW + CONTADOR
+// ==============================
+tituloInput.addEventListener("input", atualizar);
+msgInput.addEventListener("input", atualizar);
+
+function atualizar() {
+  const titulo = tituloInput.value;
+  const mensagem = msgInput.value;
+
+  prevTitulo.innerText = titulo;
+  prevMsg.innerText = mensagem;
+
+  countTitulo.innerText = `${titulo.length} / 30`;
+  countMsg.innerText = `${mensagem.length} / 120`;
 }
 
 // ==============================
 // ENVIAR PUSH
 // ==============================
 async function enviarPush() {
-  const titulo = document.getElementById("titulo").value;
-  const mensagem = document.getElementById("mensagem").value;
+  const titulo = tituloInput.value.trim();
+  const mensagem = msgInput.value.trim();
 
   if (!titulo || !mensagem) {
     alert("Preencha todos os campos");
@@ -120,20 +149,24 @@ async function enviarPush() {
     if (response.ok) {
       alert("✅ Push enviado com sucesso!");
 
-      // 🔥 LIMPAR CAMPOS
-      document.getElementById("titulo").value = "";
-      document.getElementById("mensagem").value = "";
+      // 🔥 LIMPEZA COMPLETA (SEM QUEBRAR LAYOUT)
+      tituloInput.value = "";
+      msgInput.value = "";
 
-      // 🔥 LIMPAR PREVIEW
-      document.getElementById("prevTitulo").innerText = "";
-      document.getElementById("prevMsg").innerText = "";
+      prevTitulo.innerText = "";
+      prevMsg.innerText = "";
+
+      countTitulo.innerText = "0 / 30";
+      countMsg.innerText = "0 / 120";
 
     } else {
       alert("❌ Erro ao enviar");
+      console.error(data);
     }
 
   } catch (err) {
     alert("❌ Erro de conexão");
+    console.error(err);
   }
 }
 
