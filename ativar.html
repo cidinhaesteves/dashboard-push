@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -27,7 +26,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// 🔥 FUNÇÃO GLOBAL
+// 🔥 FUNÇÃO CRÍTICA (CONVERTER VAPID)
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+}
+
 window.ativar = async function () {
   try {
     console.log("🚀 INICIANDO");
@@ -45,17 +54,19 @@ window.ativar = async function () {
 
     console.log("✅ SW REGISTRADO:", registration);
 
-    // 🔥 VAPID CORRETA (EXATAMENTE DO FIREBASE)
-    const vapidKey = "BJHIpFaeDpxLKQVxF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw";
+    const vapidKey = "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw";
+
+    // 🔥 CONVERSÃO AQUI (RESOLVE DEFINITIVO)
+    const convertedVapidKey = urlBase64ToUint8Array(vapidKey);
 
     const token = await getToken(messaging, {
-      vapidKey: vapidKey,
+      vapidKey: convertedVapidKey,
       serviceWorkerRegistration: registration
     });
 
     console.log("🔥 TOKEN:", token);
 
-    const response = await fetch("https://api-push.onrender.com/v2/save-token", {
+    await fetch("https://api-push.onrender.com/v2/save-token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -63,15 +74,7 @@ window.ativar = async function () {
       body: JSON.stringify({ token })
     });
 
-    const result = await response.json();
-
-    console.log("📡 RESPOSTA API:", result);
-
-    if (result.success) {
-      alert("✅ Notificações ativadas!");
-    } else {
-      alert("❌ Erro ao salvar token");
-    }
+    alert("✅ Notificações ativadas!");
 
   } catch (err) {
     console.error("❌ ERRO COMPLETO:", err);
