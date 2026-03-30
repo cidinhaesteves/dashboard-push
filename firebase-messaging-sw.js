@@ -17,13 +17,14 @@ self.addEventListener("push", function (event) {
 
   console.log("📩 DATA:", data);
 
-  const title = data.title || "Nova mensagem";
-  const body = data.body || "Você tem uma notificação";
+  // 🔥 AGORA FORÇAMOS DATA MODE
+  const title = data.data?.title || "Nova mensagem";
+  const body = data.data?.body || "Você tem uma notificação";
 
   event.waitUntil(
     self.registration.showNotification(title, {
       body: body,
-      icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
+      icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png",
     })
   );
 });
