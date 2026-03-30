@@ -15,16 +15,16 @@ self.addEventListener("push", function (event) {
     return;
   }
 
-  console.log("📩 DATA:", data);
+  console.log("📩 DATA COMPLETA:", data);
 
-  // 🔥 AGORA FORÇAMOS DATA MODE
+  // 🔥 CORREÇÃO AQUI
   const title = data.data?.title || "Nova mensagem";
   const body = data.data?.body || "Você tem uma notificação";
 
   event.waitUntil(
     self.registration.showNotification(title, {
       body: body,
-      icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png",
+      icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
     })
   );
 });
