@@ -15,7 +15,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
-// 🔥 CONFIG CORRETA (AGORA VALIDADA)
 const firebaseConfig = {
   apiKey: "AIzaSyCJzv86uRlFRAX1CBVejno1_89VD90J3OY",
   authDomain: "eco-goias.firebaseapp.com",
@@ -45,7 +44,8 @@ window.ativar = async function () {
 
     console.log("✅ SW REGISTRADO:", registration);
 
-    const vapidKey = "BJHIpFaeDpxLKQVxF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtKBfK9lSHF5qb4bgS2bcaq9SOD6vdw";
+    // 🔥 VAPID CORRETA (COPIADA DO FIREBASE)
+    const vapidKey = "BJHIpFaeDpxLKQVxF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw";
 
     const token = await getToken(messaging, {
       vapidKey: vapidKey,
