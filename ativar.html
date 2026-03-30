@@ -27,6 +27,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
+// 🔥 FUNÇÃO GLOBAL
 window.ativar = async function () {
   try {
     console.log("🚀 INICIANDO");
@@ -44,7 +45,7 @@ window.ativar = async function () {
 
     console.log("✅ SW REGISTRADO:", registration);
 
-    // 🔥 VAPID CORRETA (COPIADA DO FIREBASE)
+    // 🔥 VAPID CORRETA (EXATAMENTE DO FIREBASE)
     const vapidKey = "BJHIpFaeDpxLKQVxF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw";
 
     const token = await getToken(messaging, {
