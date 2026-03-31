@@ -1,74 +1,70 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Ativar Notificações</title>
+  <meta charset="UTF-8">
+  <title>Ativar Notificações</title>
 </head>
 <body>
 
-<h1>🔔 Ativar Notificações</h1>
+  <h2>🔔 Ativar Notificações</h2>
+  <button onclick="ativarNotificacoes()">Ativar Notificações</button>
 
-<button onclick="ativar()">Ativar Notificações</button>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCN05SpMhAbPyC1lkVy-t2xFDoc8QuR8A",
+      authDomain: "eco-goias.firebaseapp.com",
+      projectId: "eco-goias",
+      storageBucket: "eco-goias.firebasestorage.app",
+      messagingSenderId: "31870091742",
+      appId: "1:31870091742:web:2ea58294b93441b47c5d4f"
+    };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCJzv86uRlFRAX1CBVejno1_89VD90J3OY",
-  authDomain: "eco-goias.firebaseapp.com",
-  projectId: "eco-goias",
-  storageBucket: "eco-goias.firebasestorage.app",
-  messagingSenderId: "31870091742",
-  appId: "1:31870091742:web:f75d7509b351bfac7c5d4f"
-};
+    firebase.initializeApp(firebaseConfig);
 
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+    const messaging = firebase.messaging();
 
-window.ativar = async function () {
-  try {
-    console.log("🚀 INICIANDO");
+    async function ativarNotificacoes() {
+      try {
+        console.log("🚀 INICIANDO...");
 
-    const permission = await Notification.requestPermission();
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          console.log("❌ Permissão negada");
+          return;
+        }
 
-    if (permission !== "granted") {
-      alert("Permissão negada");
-      return;
+        console.log("✅ PERMISSÃO OK");
+
+        const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
+        console.log("✅ SW REGISTRADO:", registration);
+
+        const token = await messaging.getToken({
+          vapidKey: "BJHpFaeDpxLKQVlXF7GNzwGTeaMwv5cVJJHcXu-AFAmiyhYG2XNk4Ny5GlkB1FK9iSHF5q4bgs2bcac90D6vdw",
+          serviceWorkerRegistration: registration
+        });
+
+        console.log("🔥 TOKEN:", token);
+
+        // 🔥 CORREÇÃO AQUI (SEM /v2)
+        await fetch("https://api-push.onrender.com/save-token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ token })
+        });
+
+        console.log("📱 Token enviado para o backend com sucesso!");
+
+      } catch (error) {
+        console.error("❌ Erro:", error);
+      }
     }
-
-    console.log("✅ PERMISSÃO OK");
-
-    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-
-    console.log("✅ SW REGISTRADO:", registration);
-
-    const vapidKey = "BJHlpFaeDpxLkQVuXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkB1Fk9iSHF5q4bgS2bcaq9OD6vdw";
-
-    // 🔥 USAR DIRETO (SEM CONVERSÃO)
-    const token = await getToken(messaging, {
-      vapidKey: vapidKey,
-      serviceWorkerRegistration: registration
-    });
-
-    console.log("🔥 TOKEN:", token);
-
-    await fetch("https://api-push.onrender.com/v2/save-token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ token })
-    });
-
-    alert("✅ Notificações ativadas!");
-
-  } catch (err) {
-    console.error("❌ ERRO COMPLETO:", err);
-    alert("Erro ao ativar notificações");
-  }
-};
-</script>
+  </script>
 
 </body>
 </html>
