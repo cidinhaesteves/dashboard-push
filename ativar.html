@@ -42,13 +42,11 @@
 
         console.log("✅ SW REGISTRADO");
 
-        // 🔥 GARANTE QUE O SW ESTÁ ATIVO
         await navigator.serviceWorker.ready;
-
         console.log("✅ SW ATIVO");
 
         const token = await messaging.getToken({
-          vapidKey: "BJhlpFaeDpxLkQVUXF7GNzwGTeaMw5dVJJHcxU-AFAmiyhYG2XNkf4Ny5GtkBIFk9SHF5q4bgS2bcag9OD6vdw",
+          vapidKey: "BNK8yRqKIo8aNkr-NiLxNbZ5uXDekXEoqnxuI9y33DvMZkVvSh2-A00Sml-_s5Abcwpf5ZpGjxyC2x-z8d6D8Y8",
           serviceWorkerRegistration: registration
         });
 
