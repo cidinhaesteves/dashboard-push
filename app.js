@@ -4,7 +4,7 @@
 const API_BASE = "https://api-push.onrender.com";
 
 // ================================
-// FUNÇÃO BASE FETCH (CORRIGIDA)
+// FUNÇÃO BASE FETCH (ULTRA SEGURA)
 // ================================
 async function apiRequest(endpoint, data = {}) {
 try {
@@ -19,10 +19,15 @@ body: JSON.stringify(data)
 ```
 let result = {};
 
-try {
-  result = await res.json();
-} catch (e) {
-  console.warn("Resposta não é JSON");
+// 🔥 VERIFICA SE TEM CONTEÚDO
+const text = await res.text();
+
+if (text) {
+  try {
+    result = JSON.parse(text);
+  } catch {
+    console.warn("Resposta não é JSON:", text);
+  }
 }
 
 if (!res.ok) {
@@ -74,7 +79,7 @@ return apiRequest("/add-user-to-group", { groupName, userId });
 }
 
 // ================================
-// REGISTER USER (EXTRA FUTURO)
+// REGISTER USER
 // ================================
 async function registerUser(userId, token) {
 return apiRequest("/register-user", { userId, token });
