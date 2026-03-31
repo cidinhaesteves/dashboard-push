@@ -1,10 +1,10 @@
 // ================================
-// CONFIG API (CENTRAL)
+// CONFIG API
 // ================================
 const API_BASE = "https://api-push.onrender.com";
 
 // ================================
-// FUNÇÃO BASE FETCH (ULTRA SEGURA)
+// REQUEST BASE (100% SEGURO)
 // ================================
 async function apiRequest(endpoint, data = {}) {
 try {
@@ -17,21 +17,17 @@ body: JSON.stringify(data)
 });
 
 ```
-let result = {};
+let result = null;
 
-// 🔥 VERIFICA SE TEM CONTEÚDO
-const text = await res.text();
-
-if (text) {
-  try {
-    result = JSON.parse(text);
-  } catch {
-    console.warn("Resposta não é JSON:", text);
-  }
+try {
+  const text = await res.text();
+  result = text ? JSON.parse(text) : null;
+} catch (e) {
+  console.warn("Resposta não é JSON");
 }
 
 if (!res.ok) {
-  throw new Error(result.error || "Erro na API");
+  throw new Error((result && result.error) || "Erro na API");
 }
 
 return result;
@@ -44,43 +40,24 @@ alert("Erro: " + err.message);
 }
 
 // ================================
-// PUSH GLOBAL
+// FUNÇÕES
 // ================================
 async function sendGlobal(title, body) {
-return apiRequest("/send", { title, body });
+return await apiRequest("/send", { title, body });
 }
 
-// ================================
-// PUSH USUÁRIO
-// ================================
 async function sendToUser(userId, title, body) {
-return apiRequest("/send-to-user", { userId, title, body });
+return await apiRequest("/send-to-user", { userId, title, body });
 }
 
-// ================================
-// PUSH GRUPO
-// ================================
 async function sendToGroup(groupName, title, body) {
-return apiRequest("/send-to-group", { groupName, title, body });
+return await apiRequest("/send-to-group", { groupName, title, body });
 }
 
-// ================================
-// CRIAR GRUPO
-// ================================
 async function createGroup(name) {
-return apiRequest("/create-group", { name });
+return await apiRequest("/create-group", { name });
 }
 
-// ================================
-// ADD USER AO GRUPO
-// ================================
 async function addUserToGroup(groupName, userId) {
-return apiRequest("/add-user-to-group", { groupName, userId });
-}
-
-// ================================
-// REGISTER USER
-// ================================
-async function registerUser(userId, token) {
-return apiRequest("/register-user", { userId, token });
+return await apiRequest("/add-user-to-group", { groupName, userId });
 }
