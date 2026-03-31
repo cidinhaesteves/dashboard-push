@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -10,6 +11,7 @@
   <button onclick="ativarNotificacoes()">Ativar Notificações</button>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 
   <script>
@@ -19,12 +21,10 @@
       projectId: "eco-goias",
       storageBucket: "eco-goias.firebasestorage.app",
       messagingSenderId: "31870091742",
-      appId: "1:31870091742:web:f75d7509b351bfac7c5d4f",
-      measurementId: "G-G286HDQQJZ"
+      appId: "1:31870091742:web:f75d7509b351bfac7c5d4f"
     };
 
     firebase.initializeApp(firebaseConfig);
-
     const messaging = firebase.messaging();
 
     async function ativarNotificacoes() {
@@ -40,36 +40,40 @@
         console.log("✅ PERMISSÃO OK");
 
         const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-
-        console.log("✅ SW REGISTRADO");
-
         await navigator.serviceWorker.ready;
+
         console.log("✅ SW ATIVO");
+
+        // 🔥 FORÇA DEBUG
+        console.log("👉 BUSCANDO TOKEN...");
 
         const token = await messaging.getToken({
           vapidKey: "BNK8yRqKIo8aNkr-NiLxNbZ5uXDekXEoqnxuI9y33DvMZkVvSh2-A00Sml-_s5Abcwpf5ZpGjxyC2x-z8d6D8Y8",
           serviceWorkerRegistration: registration
         });
 
-        console.log("🔥 TOKEN:", token);
+        console.log("📦 TOKEN RAW:", token);
 
         if (!token) {
-          console.log("❌ Token não gerado");
+          console.log("❌ TOKEN NULO");
+          alert("Token não gerado");
           return;
         }
 
+        console.log("🔥 TOKEN OK:", token);
+
         await fetch("https://api-push.onrender.com/save-token", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token })
         });
 
-        console.log("📱 Token enviado com sucesso!");
+        console.log("✅ Token enviado com sucesso!");
+        alert("Notificações ativadas!");
 
-      } catch (error) {
-        console.error("❌ ERRO COMPLETO:", error);
+      } catch (err) {
+        console.error("💥 ERRO COMPLETO:", err);
+        alert("Erro: " + err.message);
       }
     }
   </script>
