@@ -10,94 +10,53 @@
 
   <h1>🚀 Dashboard Push</h1>
 
-  <!-- GLOBAL -->
+  <h2>🔔 Enviar Global</h2>
 
-  <div class="box">
-    <h2>🔔 Enviar Global</h2>
-    <input id="gTitle" placeholder="Título">
-    <textarea id="gBody" placeholder="Mensagem"></textarea>
-    <button onclick="handleSendGlobal()">Enviar</button>
-  </div>
+  <input id="globalTitle" placeholder="Título" />
+  <textarea id="globalBody" placeholder="Mensagem"></textarea>
 
-  <!-- USER -->
+<button onclick="handleSendGlobal()">Enviar</button>
 
-  <div class="box">
-    <h2>👤 Enviar para Usuário</h2>
-    <input id="uId" placeholder="User ID">
-    <input id="uTitle" placeholder="Título">
-    <textarea id="uBody" placeholder="Mensagem"></textarea>
-    <button onclick="handleSendUser()">Enviar</button>
-  </div>
+  <hr>
 
-  <!-- GROUP -->
+  <h2>👤 Enviar para Usuário</h2>
 
-  <div class="box">
-    <h2>👥 Enviar para Grupo</h2>
-    <input id="grpNameSend" placeholder="Nome do grupo">
-    <input id="grpTitle" placeholder="Título">
-    <textarea id="grpBody" placeholder="Mensagem"></textarea>
-    <button onclick="handleSendGroup()">Enviar</button>
-  </div>
+  <input id="userId" placeholder="User ID" />
+  <input id="userTitle" placeholder="Título" />
+  <textarea id="userBody" placeholder="Mensagem"></textarea>
 
-  <!-- CREATE GROUP -->
-
-  <div class="box">
-    <h2>➕ Criar Grupo</h2>
-    <input id="newGroup" placeholder="Nome do grupo">
-    <button onclick="handleCreateGroup()">Criar</button>
-  </div>
-
-  <!-- ADD USER -->
-
-  <div class="box">
-    <h2>👤➕👥 Adicionar Usuário ao Grupo</h2>
-    <input id="groupNameAdd" placeholder="Grupo">
-    <input id="userIdAdd" placeholder="User ID">
-    <button onclick="handleAddUserToGroup()">Adicionar</button>
-  </div>
+<button onclick="handleSendUser()">Enviar</button>
 
   <script src="app.js"></script>
 
   <script>
     async function handleSendGlobal() {
-      await sendGlobal(
-        document.getElementById("gTitle").value,
-        document.getElementById("gBody").value
-      );
+      const title = document.getElementById("globalTitle").value;
+      const body = document.getElementById("globalBody").value;
+
+      if (!title || !body) {
+        alert("Preencha título e mensagem");
+        return;
+      }
+
+      await sendGlobal(title, body);
+
       alert("Enviado global!");
     }
 
     async function handleSendUser() {
-      await sendToUser(
-        document.getElementById("uId").value,
-        document.getElementById("uTitle").value,
-        document.getElementById("uBody").value
-      );
+      const userId = document.getElementById("userId").value;
+      const title = document.getElementById("userTitle").value;
+      const body = document.getElementById("userBody").value;
+
+      if (!userId || !title || !body) {
+        alert("Preencha todos os campos");
+        return;
+      }
+
+      await sendToUser(userId, title, body);
+
       alert("Enviado para usuário!");
-    }
-
-    async function handleSendGroup() {
-      await sendToGroup(
-        document.getElementById("grpNameSend").value,
-        document.getElementById("grpTitle").value,
-        document.getElementById("grpBody").value
-      );
-      alert("Enviado para grupo!");
-    }
-
-    async function handleCreateGroup() {
-      await createGroup(
-        document.getElementById("newGroup").value
-      );
-      alert("Grupo criado!");
-    }
-
-    async function handleAddUserToGroup() {
-      await addUserToGroup(
-        document.getElementById("groupNameAdd").value,
-        document.getElementById("userIdAdd").value
-      );
-      alert("Usuário adicionado!");
     }
   </script>
 
