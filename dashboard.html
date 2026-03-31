@@ -1,183 +1,105 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard Push</title>
-
-<style>
-body {
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  padding: 40px;
-}
-
-.box {
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 10px;
-  width: 320px;
-}
-
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 5px;
-  border: none;
-  font-size: 14px;
-}
-
-.counter {
-  font-size: 12px;
-  text-align: right;
-  color: #94a3b8;
-}
-
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.enviar {
-  background: #22c55e;
-}
-
-.sair {
-  background: #ef4444;
-}
-
-.preview {
-  background: #334155;
-  padding: 15px;
-  border-radius: 10px;
-  min-height: 150px;
-
-  /* 🔥 CORREÇÃO IMPORTANTE */
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Dashboard Push</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="box">
-  <h3>🚀 NEW PUSH</h3>
+  <h1>🚀 Dashboard Push</h1>
 
-  <input id="titulo" maxlength="30" placeholder="Título (máx 30)">
-  <div class="counter" id="countTitulo">0 / 30</div>
+  <!-- GLOBAL -->
 
-  <textarea id="mensagem" maxlength="120" placeholder="Mensagem (máx 120)"></textarea>
-  <div class="counter" id="countMsg">0 / 120</div>
-
-  <button class="enviar" onclick="enviarPush()">Enviar Push</button>
-  <button class="sair" onclick="logout()">Sair</button>
-</div>
-
-<div class="box">
-  <h3>📱 Preview</h3>
-  <div class="preview">
-    <strong id="prevTitulo"></strong>
-    <p id="prevMsg"></p>
+  <div class="box">
+    <h2>🔔 Enviar Global</h2>
+    <input id="gTitle" placeholder="Título">
+    <textarea id="gBody" placeholder="Mensagem"></textarea>
+    <button onclick="handleSendGlobal()">Enviar</button>
   </div>
-</div>
 
-<script>
+  <!-- USER -->
 
-// ==============================
-// ELEMENTOS
-// ==============================
-const tituloInput = document.getElementById("titulo");
-const msgInput = document.getElementById("mensagem");
+  <div class="box">
+    <h2>👤 Enviar para Usuário</h2>
+    <input id="uId" placeholder="User ID">
+    <input id="uTitle" placeholder="Título">
+    <textarea id="uBody" placeholder="Mensagem"></textarea>
+    <button onclick="handleSendUser()">Enviar</button>
+  </div>
 
-const prevTitulo = document.getElementById("prevTitulo");
-const prevMsg = document.getElementById("prevMsg");
+  <!-- GROUP -->
 
-const countTitulo = document.getElementById("countTitulo");
-const countMsg = document.getElementById("countMsg");
+  <div class="box">
+    <h2>👥 Enviar para Grupo</h2>
+    <input id="grpNameSend" placeholder="Nome do grupo">
+    <input id="grpTitle" placeholder="Título">
+    <textarea id="grpBody" placeholder="Mensagem"></textarea>
+    <button onclick="handleSendGroup()">Enviar</button>
+  </div>
 
-// ==============================
-// ATUALIZAR PREVIEW + CONTADOR
-// ==============================
-tituloInput.addEventListener("input", atualizar);
-msgInput.addEventListener("input", atualizar);
+  <!-- CREATE GROUP -->
 
-function atualizar() {
-  const titulo = tituloInput.value;
-  const mensagem = msgInput.value;
+  <div class="box">
+    <h2>➕ Criar Grupo</h2>
+    <input id="newGroup" placeholder="Nome do grupo">
+    <button onclick="handleCreateGroup()">Criar</button>
+  </div>
 
-  prevTitulo.innerText = titulo;
-  prevMsg.innerText = mensagem;
+  <!-- ADD USER -->
 
-  countTitulo.innerText = `${titulo.length} / 30`;
-  countMsg.innerText = `${mensagem.length} / 120`;
-}
+  <div class="box">
+    <h2>👤➕👥 Adicionar Usuário ao Grupo</h2>
+    <input id="groupNameAdd" placeholder="Grupo">
+    <input id="userIdAdd" placeholder="User ID">
+    <button onclick="handleAddUserToGroup()">Adicionar</button>
+  </div>
 
-// ==============================
-// ENVIAR PUSH
-// ==============================
-async function enviarPush() {
-  const titulo = tituloInput.value.trim();
-  const mensagem = msgInput.value.trim();
+  <script src="app.js"></script>
 
-  if (!titulo || !mensagem) {
-    alert("Preencha todos os campos");
-    return;
-  }
-
-  try {
-    const response = await fetch("https://api-push.onrender.com/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ titulo, mensagem })
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      alert("✅ Push enviado com sucesso!");
-
-      // 🔥 LIMPEZA COMPLETA (SEM QUEBRAR LAYOUT)
-      tituloInput.value = "";
-      msgInput.value = "";
-
-      prevTitulo.innerText = "";
-      prevMsg.innerText = "";
-
-      countTitulo.innerText = "0 / 30";
-      countMsg.innerText = "0 / 120";
-
-    } else {
-      alert("❌ Erro ao enviar");
-      console.error(data);
+  <script>
+    async function handleSendGlobal() {
+      await sendGlobal(
+        document.getElementById("gTitle").value,
+        document.getElementById("gBody").value
+      );
+      alert("Enviado global!");
     }
 
-  } catch (err) {
-    alert("❌ Erro de conexão");
-    console.error(err);
-  }
-}
+    async function handleSendUser() {
+      await sendToUser(
+        document.getElementById("uId").value,
+        document.getElementById("uTitle").value,
+        document.getElementById("uBody").value
+      );
+      alert("Enviado para usuário!");
+    }
 
-// ==============================
-// LOGOUT
-// ==============================
-function logout() {
-  window.location.href = "index.html";
-}
+    async function handleSendGroup() {
+      await sendToGroup(
+        document.getElementById("grpNameSend").value,
+        document.getElementById("grpTitle").value,
+        document.getElementById("grpBody").value
+      );
+      alert("Enviado para grupo!");
+    }
 
-</script>
+    async function handleCreateGroup() {
+      await createGroup(
+        document.getElementById("newGroup").value
+      );
+      alert("Grupo criado!");
+    }
+
+    async function handleAddUserToGroup() {
+      await addUserToGroup(
+        document.getElementById("groupNameAdd").value,
+        document.getElementById("userIdAdd").value
+      );
+      alert("Usuário adicionado!");
+    }
+  </script>
 
 </body>
 </html>
