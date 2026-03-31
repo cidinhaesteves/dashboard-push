@@ -4,7 +4,7 @@
 const API_BASE = "https://api-push.onrender.com";
 
 // ================================
-// FUNÇÃO BASE FETCH
+// FUNÇÃO BASE FETCH (CORRIGIDA)
 // ================================
 async function apiRequest(endpoint, data = {}) {
 try {
@@ -17,7 +17,13 @@ body: JSON.stringify(data)
 });
 
 ```
-const result = await res.json().catch(() => ({}));
+let result = {};
+
+try {
+  result = await res.json();
+} catch (e) {
+  console.warn("Resposta não é JSON");
+}
 
 if (!res.ok) {
   throw new Error(result.error || "Erro na API");
