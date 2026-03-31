@@ -1,30 +1,32 @@
-self.addEventListener("push", function (event) {
-  console.log("🔥 PUSH RECEBIDO");
+importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js");
 
-  if (!event.data) {
-    console.log("❌ Sem dados");
-    return;
-  }
+// 🔥 CONFIG FIREBASE (JÁ PREENCHIDO)
+firebase.initializeApp({
+  apiKey: "AIzaSyCN05SpMrHAbPyC1lkYy-t2xFDoc8QuR8A",
+  authDomain: "eco-goias.firebaseapp.com",
+  projectId: "eco-goias",
+  storageBucket: "eco-goias.firebasestorage.app",
+  messagingSenderId: "31870091742",
+  appId: "1:31870091742:web:2ea58294b93441b47c5d4f",
+  measurementId: "G-RJVTG241KX"
+});
 
-  let data = {};
+const messaging = firebase.messaging();
 
-  try {
-    data = event.data.json();
-  } catch (e) {
-    console.log("❌ Erro ao ler JSON");
-    return;
-  }
+// ==========================
+// NOTIFICAÇÃO CORRETA (FIX DEFINITIVO)
+// ==========================
+messaging.onBackgroundMessage(function (payload) {
+  console.log("🔥 PUSH RECEBIDO:", payload);
 
-  console.log("📩 DATA COMPLETA:", data);
+  // 👉 pega EXATAMENTE o que veio do backend
+  const notificationTitle = payload.notification?.title || "Notificação";
+  const notificationOptions = {
+    body: payload.notification?.body || "",
+    icon: payload.notification?.icon || "https://cdn-icons-png.flaticon.com/512/1827/1827392.png",
+    badge: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
+  };
 
-  // 🔥 CORREÇÃO AQUI
-  const title = data.data?.title || "Nova mensagem";
-  const body = data.data?.body || "Você tem uma notificação";
-
-  event.waitUntil(
-    self.registration.showNotification(title, {
-      body: body,
-      icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
-    })
-  );
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
