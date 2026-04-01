@@ -1,12 +1,8 @@
-// ================================
-// IMPORTS FIREBASE (COMPAT)
-// ================================
-importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js");
+// 🔥 IMPORTANTE: NÃO usar import ES6 aqui
+importScripts("https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js");
 
-// ================================
-// CONFIG FIREBASE
-// ================================
+// 🔐 CONFIG FIREBASE
 firebase.initializeApp({
   apiKey: "AIzaSyCJzv86uRlFRAX1CBVejno1_89VD90J3OY",
   authDomain: "eco-goias.firebaseapp.com",
@@ -17,29 +13,33 @@ firebase.initializeApp({
   measurementId: "G-G286HDQQJZ"
 });
 
-// ================================
-// INIT MESSAGING
-// ================================
 const messaging = firebase.messaging();
 
-// ================================
-// RECEBER PUSH EM BACKGROUND
-// ================================
-messaging.onBackgroundMessage(function (payload) {
-  console.log("📩 PUSH RECEBIDO:", payload);
+// ===============================
+// 🔥 TRATAMENTO DO PUSH (ESSENCIAL)
+// ===============================
+self.addEventListener("push", function (event) {
+  console.log("🔥 PUSH RECEBIDO");
 
-  const title =
-    payload.notification?.title ||
-    payload.data?.title ||
-    "Nova notificação";
+  if (!event.data) {
+    console.log("Sem payload");
+    return;
+  }
 
-  const body =
-    payload.notification?.body ||
-    payload.data?.body ||
-    "Você recebeu uma mensagem";
+  const data = event.data.json();
 
-  self.registration.showNotification(title, {
+  console.log("📩 Dados:", data);
+
+  const title = data.notification?.title || "Nova mensagem";
+  const body = data.notification?.body || "Você recebeu uma notificação";
+
+  const options = {
     body: body,
     icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png",
-  });
+    badge: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png",
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
 });
