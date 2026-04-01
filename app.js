@@ -1,74 +1,173 @@
-// ================================
-// CONFIG API
-// ================================
-const API_BASE = "https://api-push.onrender.com";
+// ===============================
+// 🔥 CONFIG BACKEND
+// ===============================
+const BASE_URL = "https://SEU-BACKEND.onrender.com";
 
-// ================================
-// REQUEST BASE (100% SEGURO)
-// ================================
-async function apiRequest(endpoint, data = {}) {
+// ===============================
+// 🔐 TOKEN (LOGIN)
+// ===============================
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+// ===============================
+// 🔔 GERAR TOKEN FCM
+// ===============================
+async function gerarToken() {
   try {
-    const res = await fetch(API_BASE + endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
+    const permission = await Notification.requestPermission();
+
+    if (permission !== "granted") {
+      alert("Permissão negada para notificações");
+      return;
+    }
+
+    const token = await messaging.getToken({
+      vapidKey: "BNK8yRqKIo8aNkr-NiLxNbZ5uXDekXEoqnxuI9y33DvMZkVvSh2-A00Sml-_s5Abcwpf5ZpGjxyC2x-z8d6D8Y8"
     });
 
-    let result = null;
+    console.log("Token FCM:", token);
 
-    try {
-      const text = await res.text();
-      result = text ? JSON.parse(text) : null;
-    } catch (e) {
-      console.warn("Resposta não é JSON");
-    }
+    document.getElementById("token").innerText = token;
 
-    if (!res.ok) {
-      throw new Error((result && result.error) || "Erro na API");
-    }
+    return token;
 
-    console.log("RESPOSTA RAW:", result);
-
-    return result;
-
-  } catch (err) {
-    console.error("Erro API:", err);
-    alert("Erro: " + err.message);
+  } catch (error) {
+    console.error("Erro ao gerar token:", error);
   }
 }
 
-// ================================
-// FUNÇÕES
-// ================================
-async function sendGlobal(title, body) {
-  return await apiRequest("/send", {
-    titulo: title,
-    mensagem: body
+// ===============================
+// 💾 SALVAR TOKEN NO BACKEND
+// ===============================
+async function salvarToken() {
+  const tokenFCM = await gerarToken();
+
+  if (!tokenFCM) return;
+
+  const userId = document.getElementById("userId")?.value || "";
+  const group = document.getElementById("group")?.value || "";
+
+  await fetch(`${BASE_URL}/save-token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      token: tokenFCM,
+      userId,
+      group
+    })
   });
+
+  alert("Token salvo com sucesso!");
 }
 
-async function sendToUser(userId, title, body) {
-  return await apiRequest("/send-to-user", {
-    userId,
-    titulo: title,
-    mensagem: body
+// ===============================
+// 🚀 ENVIO GLOBAL (PROTEGIDO)
+// ===============================
+async function enviarGlobal() {
+  const titulo = document.getElementById("titulo").value;
+  const mensagem = document.getElementById("mensagem").value;
+
+  const token = getToken();
+
+  if (!token) {
+    alert("Você precisa estar logado!");
+    return;
+  }
+
+  const res = await fetch(`${BASE_URL}/send`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token
+    },
+    body: JSON.stringify({
+      titulo,
+      mensagem
+    })
   });
+
+  const data = await res.json();
+
+  console.log(data);
+  alert("Envio global realizado!");
 }
 
-async function sendToGroup(groupName, title, body) {
-  return await apiRequest("/send-to-group", {
-    groupName,
-    titulo: title,
-    mensagem: body
+// ===============================
+// 👤 ENVIO POR USUÁRIO
+// ===============================
+async function enviarParaUsuario() {
+  const userId = document.getElementById("userId").value;
+  const titulo = document.getElementById("titulo").value;
+  const mensagem = document.getElementById("mensagem").value;
+
+  const token = getToken();
+
+  if (!token) {
+    alert("Você precisa estar logado!");
+    return;
+  }
+
+  const res = await fetch(`${BASE_URL}/send-to-user`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token
+    },
+    body: JSON.stringify({
+      userId,
+      titulo,
+      mensagem
+    })
   });
+
+  const data = await res.json();
+
+  console.log(data);
+  alert("Envio para usuário realizado!");
 }
 
-async function createGroup(name) {
-  return await apiRequest("/create-group", { name });
+// ===============================
+// 👥 ENVIO POR GRUPO
+// ===============================
+async function enviarParaGrupo() {
+  const group = document.getElementById("group").value;
+  const titulo = document.getElementById("titulo").value;
+  const mensagem = document.getElementById("mensagem").value;
+
+  const token = getToken();
+
+  if (!token) {
+    alert("Você precisa estar logado!");
+    return;
+  }
+
+  const res = await fetch(`${BASE_URL}/send-to-group`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token
+    },
+    body: JSON.stringify({
+      group,
+      titulo,
+      mensagem
+    })
+  });
+
+  const data = await res.json();
+
+  console.log(data);
+  alert("Envio para grupo realizado!");
 }
 
-async function addUserToGroup(groupName, userId) {
-  return await apiRequest("/add-user-to-group", { groupName, userId });
+// ===============================
+// 🔐 LOGOUT
+// ===============================
+function logout() {
+  localStorage.removeItem("token");
+  alert("Logout realizado!");
+  window.location.href = "/login.html";
 }
