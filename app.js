@@ -4,7 +4,7 @@
 const API_BASE = "https://api-push.onrender.com";
 
 // ================================
-// REQUEST BASE (100% BLINDADO)
+// REQUEST BASE (100% SEGURO)
 // ================================
 async function apiRequest(endpoint, data = {}) {
   try {
@@ -17,57 +17,54 @@ async function apiRequest(endpoint, data = {}) {
     });
 
     let result = null;
-    let text = "";
 
     try {
-      text = await res.text();
-      console.log("RESPOSTA RAW:", text);
-
-      if (text && text.trim().startsWith("{")) {
-        result = JSON.parse(text);
-      } else {
-        result = { message: text };
-      }
-
+      const text = await res.text();
+      result = text ? JSON.parse(text) : null;
     } catch (e) {
-      console.warn("Erro ao parsear resposta:", e);
-      result = { message: text };
+      console.warn("Resposta não é JSON");
     }
 
     if (!res.ok) {
-      throw new Error(
-        (result && result.error) ||
-        (result && result.message) ||
-        "Erro na API"
-      );
+      throw new Error((result && result.error) || "Erro na API");
     }
+
+    console.log("RESPOSTA RAW:", result);
 
     return result;
 
   } catch (err) {
     console.error("Erro API:", err);
-    alert("Erro: " + (err.message || "Erro desconhecido"));
+    alert("Erro: " + err.message);
   }
 }
 
 // ================================
-// FUNÇÕES DE ENVIO
+// FUNÇÕES
 // ================================
 async function sendGlobal(title, body) {
-  return await apiRequest("/send", { title, body });
+  return await apiRequest("/send", {
+    titulo: title,
+    mensagem: body
+  });
 }
 
 async function sendToUser(userId, title, body) {
-  return await apiRequest("/send-to-user", { userId, title, body });
+  return await apiRequest("/send-to-user", {
+    userId,
+    titulo: title,
+    mensagem: body
+  });
 }
 
 async function sendToGroup(groupName, title, body) {
-  return await apiRequest("/send-to-group", { groupName, title, body });
+  return await apiRequest("/send-to-group", {
+    groupName,
+    titulo: title,
+    mensagem: body
+  });
 }
 
-// ================================
-// FUNÇÕES DE GRUPO
-// ================================
 async function createGroup(name) {
   return await apiRequest("/create-group", { name });
 }
