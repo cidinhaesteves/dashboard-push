@@ -18,9 +18,9 @@
 
   <hr>
 
-  <h2>👤 Enviar para Usuário</h2>
+  <h2>👤 Enviar para Usuário (EMAIL)</h2>
 
-  <input id="userId" placeholder="User ID" />
+  <input id="userEmail" placeholder="Email do usuário" />
   <input id="userTitle" placeholder="Título" />
   <textarea id="userBody" placeholder="Mensagem"></textarea>
 
@@ -59,16 +59,16 @@
     }
 
     async function handleSendUser() {
-      const userId = document.getElementById("userId").value;
+      const email = document.getElementById("userEmail").value;
       const title = document.getElementById("userTitle").value;
       const body = document.getElementById("userBody").value;
 
-      if (!userId || !title || !body) {
+      if (!email || !title || !body) {
         alert("Preencha todos os campos");
         return;
       }
 
-      await sendToUser(userId, title, body);
+      await sendToUser(email, title, body);
       alert("Enviado para usuário!");
     }
   </script>
