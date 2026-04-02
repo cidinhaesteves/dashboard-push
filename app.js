@@ -4,7 +4,7 @@
 const API_URL = "https://api-push.onrender.com";
 
 // ================================
-// ENVIO GLOBAL (FUNÇÃO GLOBAL)
+// ENVIO GLOBAL (ALINHADO COM BACKEND)
 // ================================
 window.sendGlobal = async function (title, body) {
   try {
@@ -15,15 +15,15 @@ window.sendGlobal = async function (title, body) {
       return;
     }
 
-    const res = await fetch(`${API_URL}/send`, {
+    const res = await fetch(`${API_URL}/send-global`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + token
       },
       body: JSON.stringify({
-        titulo: title,
-        mensagem: body
+        title,
+        body
       })
     });
 
@@ -32,7 +32,7 @@ window.sendGlobal = async function (title, body) {
     console.log("🚀 Envio Global:", data);
 
     if (!res.ok) {
-      alert("Erro ao enviar push");
+      alert(data.error || "Erro ao enviar push global");
       return;
     }
 
@@ -45,9 +45,9 @@ window.sendGlobal = async function (title, body) {
 };
 
 // ================================
-// ENVIO PARA USUÁRIO (FUNÇÃO GLOBAL)
+// ENVIO PARA USUÁRIO POR EMAIL (NÍVEL 2)
 // ================================
-window.sendToUser = async function (userId, title, body) {
+window.sendToUser = async function (email, title, body) {
   try {
     const token = localStorage.getItem("token");
 
@@ -56,16 +56,16 @@ window.sendToUser = async function (userId, title, body) {
       return;
     }
 
-    const res = await fetch(`${API_URL}/send-user`, {
+    const res = await fetch(`${API_URL}/send-to-user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + token
       },
       body: JSON.stringify({
-        userId,
-        titulo: title,
-        mensagem: body
+        email,
+        title,
+        body
       })
     });
 
@@ -74,7 +74,7 @@ window.sendToUser = async function (userId, title, body) {
     console.log("👤 Envio Usuário:", data);
 
     if (!res.ok) {
-      alert("Erro ao enviar para usuário");
+      alert(data.error || "Erro ao enviar para usuário");
       return;
     }
 
