@@ -14,25 +14,19 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 
   <script>
-    // ================================
-    // CONFIG FIREBASE (SEU PROJETO)
-    // ================================
     const firebaseConfig = {
-      apiKey: "SUA_API_KEY",
-      authDomain: "SEU_PROJECT.firebaseapp.com",
-      projectId: "SEU_PROJECT_ID",
-      storageBucket: "SEU_PROJECT.appspot.com",
-      messagingSenderId: "SEU_SENDER_ID",
-      appId: "SEU_APP_ID"
+      apiKey: "AIzaSyCN05SpMrhAbPyC1lkYy-t2xFDoc8QuR8A",
+      authDomain: "eco-goias.firebaseapp.com",
+      projectId: "eco-goias",
+      storageBucket: "eco-goias.firebasestorage.app",
+      messagingSenderId: "31870091742",
+      appId: "1:31870091742:web:2ea58294b93441b47c5d4f"
     };
 
     firebase.initializeApp(firebaseConfig);
 
     const messaging = firebase.messaging();
 
-    // ================================
-    // FUNÇÃO PRINCIPAL
-    // ================================
     async function ativarNotificacoes() {
       try {
         console.log("🚀 INICIANDO...");
@@ -46,29 +40,27 @@
 
         console.log("✅ PERMISSÃO OK");
 
+        // 🔥 REGISTRA SW
         const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
 
-        console.log("✅ SW ATIVO");
+        console.log("📦 SW REGISTRADO");
+
+        // 🔥 AGUARDA SW FICAR PRONTO (CORREÇÃO REAL)
+        await navigator.serviceWorker.ready;
+
+        console.log("✅ SW PRONTO");
 
         const token = await messaging.getToken({
-          vapidKey: "BNK8yRqKIo8aNkr-NiLxNbZ5uXDekXEoqnxuI9y33DvMZkVvSh2-A00Sml-_s5Abcwpf5ZpGjxyC2x-z8d6D8Y8".trim(),
+          vapidKey: "BNK8yRqKIo8aNkr-NiLxNbZ5uXDekXEoqnxuI9y33DvMZkVvSh2-A00Sml-_s5Abcwpf5ZpGjxyC2x-z8d6D8Y8",
           serviceWorkerRegistration: registration
         });
 
         console.log("🔥 TOKEN:", token);
 
-        if (!token) {
-          alert("Erro ao gerar token");
-          return;
-        }
-
-        // ================================
-        // SALVAR TOKEN COM JWT
-        // ================================
         const tokenJWT = localStorage.getItem("token");
 
         if (!tokenJWT) {
-          alert("⚠️ Faça login antes de ativar notificações");
+          alert("Faça login primeiro");
           return;
         }
 
@@ -83,7 +75,7 @@
 
         const data = await res.json();
 
-        console.log("📦 RESPOSTA BACKEND:", data);
+        console.log("📦 SALVO:", data);
 
         alert("✅ Notificações ativadas!");
 
