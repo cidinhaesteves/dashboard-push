@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -8,72 +7,89 @@
 <body>
 
   <h2>🔔 Ativar Notificações</h2>
+
   <button onclick="ativarNotificacoes()">Ativar Notificações</button>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 
   <script>
+    // ================================
+    // CONFIG FIREBASE (SEU PROJETO)
+    // ================================
     const firebaseConfig = {
-      apiKey: "AIzaSyCJzv86uRlFRAX1CBVejno1_89VD90J3OY",
-      authDomain: "eco-goias.firebaseapp.com",
-      projectId: "eco-goias",
-      storageBucket: "eco-goias.firebasestorage.app",
-      messagingSenderId: "31870091742",
-      appId: "1:31870091742:web:f75d7509b351bfac7c5d4f"
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_PROJECT.firebaseapp.com",
+      projectId: "SEU_PROJECT_ID",
+      storageBucket: "SEU_PROJECT.appspot.com",
+      messagingSenderId: "SEU_SENDER_ID",
+      appId: "SEU_APP_ID"
     };
 
     firebase.initializeApp(firebaseConfig);
+
     const messaging = firebase.messaging();
 
+    // ================================
+    // FUNÇÃO PRINCIPAL
+    // ================================
     async function ativarNotificacoes() {
       try {
         console.log("🚀 INICIANDO...");
 
         const permission = await Notification.requestPermission();
+
         if (permission !== "granted") {
-          console.log("❌ Permissão negada");
+          alert("Permissão negada");
           return;
         }
 
         console.log("✅ PERMISSÃO OK");
 
         const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-        await navigator.serviceWorker.ready;
 
         console.log("✅ SW ATIVO");
 
-        // 🔥 FORÇA DEBUG
-        console.log("👉 BUSCANDO TOKEN...");
-
         const token = await messaging.getToken({
-          vapidKey: "BNK8yRqKIo8aNkr-NiLxNbZ5uXDekXEoqnxuI9y33DvMZkVvSh2-A00Sml-_s5Abcwpf5ZpGjxyC2x-z8d6D8Y8",
+          vapidKey: "SUA_VAPID_KEY",
           serviceWorkerRegistration: registration
         });
 
-        console.log("📦 TOKEN RAW:", token);
+        console.log("🔥 TOKEN:", token);
 
         if (!token) {
-          console.log("❌ TOKEN NULO");
-          alert("Token não gerado");
+          alert("Erro ao gerar token");
           return;
         }
 
-        console.log("🔥 TOKEN OK:", token);
+        // ================================
+        // 🔥 SALVAR TOKEN COM JWT
+        // ================================
+        const tokenJWT = localStorage.getItem("token");
 
-        await fetch("https://api-push.onrender.com/save-token", {
+        if (!tokenJWT) {
+          alert("⚠️ Faça login antes de ativar notificações");
+          return;
+        }
+
+        const res = await fetch("https://api-push.onrender.com/save-token", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + tokenJWT
+          },
           body: JSON.stringify({ token })
         });
 
-        console.log("✅ Token enviado com sucesso!");
-        alert("Notificações ativadas!");
+        const data = await res.json();
+
+        console.log("📦 RESPOSTA BACKEND:", data);
+
+        alert("✅ Notificações ativadas!");
 
       } catch (err) {
-        console.error("💥 ERRO COMPLETO:", err);
-        alert("Erro: " + err.message);
+        console.error("❌ ERRO:", err);
+        alert("Erro ao ativar notificações");
       }
     }
   </script>
