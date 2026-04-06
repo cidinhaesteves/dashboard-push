@@ -28,12 +28,9 @@ window.login = async function () {
       return;
     }
 
-    // 🔥 SALVA TOKEN NO NAVEGADOR
     localStorage.setItem("token", data.token);
 
     alert("Login realizado com sucesso!");
-
-    // 🔁 REDIRECIONA PARA DASHBOARD
     window.location.href = "dashboard.html";
 
   } catch (err) {
@@ -42,7 +39,7 @@ window.login = async function () {
 };
 
 // ================================
-// VERIFICAR TOKEN AO ABRIR DASHBOARD
+// CHECK AUTH
 // ================================
 window.checkAuth = function () {
   const token = localStorage.getItem("token");
@@ -56,19 +53,20 @@ window.checkAuth = function () {
 };
 
 // ================================
-// ENVIO GLOBAL
+// ENVIO GLOBAL (CORRIGIDO)
 // ================================
 window.sendGlobal = async function () {
   try {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("Token não encontrado. Faça login novamente.");
+      alert("Token não encontrado");
       return;
     }
 
-    const title = document.getElementById("title").value;
-    const body = document.getElementById("body").value;
+    // 🔥 IDs CORRETOS DO HTML
+    const title = document.getElementById("globalTitle").value;
+    const body = document.getElementById("globalBody").value;
 
     const res = await fetch(`${API_URL}/send-global`, {
       method: "POST",
@@ -98,7 +96,7 @@ window.sendToUser = async function () {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("Token não encontrado. Faça login novamente.");
+      alert("Token não encontrado");
       return;
     }
 
