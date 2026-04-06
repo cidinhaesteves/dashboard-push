@@ -39,13 +39,13 @@ window.ativar = async function () {
 
     console.log("✅ PERMISSÃO OK");
 
-    const token = await getToken(messaging, {
+    const fcmToken = await getToken(messaging, {
       vapidKey: "SUA_VAPID_KEY"
     });
 
-    console.log("🔥 TOKEN:", token);
+    console.log("🔥 FCM TOKEN:", fcmToken);
 
-    // 🔥 PEGA TOKEN JWT DO LOGIN
+    // 🔥 PEGA JWT
     const authToken = localStorage.getItem("token");
 
     if (!authToken) {
@@ -53,20 +53,15 @@ window.ativar = async function () {
       return;
     }
 
-    // 🔥 DECODIFICA O TOKEN PARA PEGAR O EMAIL
-    const payload = JSON.parse(atob(authToken.split(".")[1]));
-    const email = payload.email;
-
-    console.log("📧 EMAIL:", email);
-
+    // 🔥 ENVIA JWT + FCM TOKEN
     const res = await fetch("https://api-push.onrender.com/save-token", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + authToken
       },
       body: JSON.stringify({
-        token,
-        email
+        token: fcmToken
       })
     });
 
