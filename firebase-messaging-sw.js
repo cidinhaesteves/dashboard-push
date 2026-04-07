@@ -1,45 +1,40 @@
-// 🔥 IMPORTANTE: NÃO usar import ES6 aqui
-importScripts("https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js");
+// 🔥 FORÇA ATIVAÇÃO IMEDIATA DO SERVICE WORKER
+self.addEventListener("install", (event) => {
+  self.skipWaiting();
+});
 
-// 🔐 CONFIG FIREBASE
+// 🔥 FORÇA O SW A CONTROLAR A PÁGINA
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+// 🔥 IMPORTS FIREBASE (VERSÃO COMPAT)
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+
+// 🔥 CONFIG DO SEU FIREBASE (CONFIRMADO PELAS IMAGENS)
 firebase.initializeApp({
-  apiKey: "AIzaSyCJzv86uRlFRAX1CBVejno1_89VD90J3OY",
+  apiKey: "AIzaSyCNQ5SPMtnAbPvC11kYv-t2xEDoc8QuR8A",
   authDomain: "eco-goias.firebaseapp.com",
   projectId: "eco-goias",
   storageBucket: "eco-goias.firebasestorage.app",
   messagingSenderId: "31870091742",
-  appId: "1:31870091742:web:f75d7509b351bfac7c5d4f",
-  measurementId: "G-G286HDQQJZ"
+  appId: "1:31870091742:web:2ea58294b93441b47c5d4f",
+  measurementId: "G-RJVTG24IK0"
 });
 
+// 🔥 INICIALIZA MESSAGING
 const messaging = firebase.messaging();
 
-// ===============================
-// 🔥 TRATAMENTO DO PUSH (ESSENCIAL)
-// ===============================
-self.addEventListener("push", function (event) {
-  console.log("🔥 PUSH RECEBIDO");
+// 🔥 RECEBER PUSH EM BACKGROUND
+messaging.onBackgroundMessage(function(payload) {
+  console.log("🔥 PUSH RECEBIDO NO SW:", payload);
 
-  if (!event.data) {
-    console.log("Sem payload");
-    return;
-  }
-
-  const data = event.data.json();
-
-  console.log("📩 Dados:", data);
-
-  const title = data.notification?.title || "Nova mensagem";
-  const body = data.notification?.body || "Você recebeu uma notificação";
-
+  const title = payload.notification?.title || "Notificação";
   const options = {
-    body: body,
-    icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png",
-    badge: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png",
+    body: payload.notification?.body || "Você recebeu uma mensagem",
+    icon: "/icon.png"
   };
 
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
+  self.registration.showNotification(title, options);
 });
