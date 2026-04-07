@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Ativar Notificações</title>
 </head>
-
 <body>
 
 <h2>🔔 Ativar Notificações</h2>
@@ -15,16 +14,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
 const firebaseConfig = {
-  apiKey: "SUA_KEY",
-  authDomain: "SUA_DOMAIN",
-  projectId: "SUA_PROJECT",
-  storageBucket: "SUA_BUCKET",
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_BUCKET",
   messagingSenderId: "SEU_SENDER_ID",
   appId: "SEU_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
+
+// SUA VAPID (mantém a mesma)
+const VAPID_KEY = "SUA_VAPID_KEY_AQUI";
 
 window.ativar = async function () {
   try {
@@ -39,30 +41,36 @@ window.ativar = async function () {
 
     console.log("✅ PERMISSÃO OK");
 
-    const fcmToken = await getToken(messaging, {
-      vapidKey: "SUA_VAPID_KEY"
+    // 🔥 REGISTRA SW
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
+    // 🔥 GARANTE QUE ESTÁ PRONTO
+    await navigator.serviceWorker.ready;
+
+    console.log("📦 SW PRONTO");
+
+    // 🔥 PEGA TOKEN SOMENTE AGORA
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: registration
     });
 
-    console.log("🔥 FCM TOKEN:", fcmToken);
+    console.log("🔥 TOKEN:", token);
 
-    // 🔥 PEGA JWT
-    const authToken = localStorage.getItem("token");
+    const jwt = localStorage.getItem("token");
 
-    if (!authToken) {
-      alert("Faça login primeiro!");
+    if (!jwt) {
+      alert("Faça login primeiro");
       return;
     }
 
-    // 🔥 ENVIA JWT + FCM TOKEN
     const res = await fetch("https://api-push.onrender.com/save-token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + authToken
+        "Authorization": "Bearer " + jwt
       },
-      body: JSON.stringify({
-        token: fcmToken
-      })
+      body: JSON.stringify({ token })
     });
 
     const data = await res.json();
@@ -72,8 +80,8 @@ window.ativar = async function () {
     alert("✅ Notificações ativadas!");
 
   } catch (err) {
-    console.error("Erro geral:", err);
-    alert("Erro ao salvar token");
+    console.error("❌ ERRO REAL:", err);
+    alert("Erro ao ativar notificações");
   }
 };
 </script>
