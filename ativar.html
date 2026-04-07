@@ -10,21 +10,18 @@
 
   <button onclick="ativar()">Ativar Notificações</button>
 
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 
   <script>
-    const firebaseConfig = {
+    firebase.initializeApp({
       apiKey: "AIzaSyCNQ5SPMtnAbPvC11kYv-t2xEDoc8QuR8A",
       authDomain: "eco-goias.firebaseapp.com",
       projectId: "eco-goias",
       storageBucket: "eco-goias.firebasestorage.app",
       messagingSenderId: "31870091742",
       appId: "1:31870091742:web:2ea58294b93441b47c5d4f"
-    };
-
-    firebase.initializeApp(firebaseConfig);
+    });
 
     async function ativar() {
       try {
@@ -43,8 +40,8 @@
 
         const messaging = firebase.messaging();
 
-        // 🔥 VAPID 100% CORRETA (SEM ESPAÇO, SEM QUEBRA)
-        const vapidKey = "BNKbYRqKlo8aNkr-NiLxNbZ5uXDEkXEogxnUfy33DVmzKVvSh2-AO0Sml-S5Abcwpf5ZpGjxcy2x-3d6dD9Y8";
+        // 🔥 COLE SUA NOVA VAPID AQUI (87 chars)
+        const vapidKey = "BFbTfVXFfHUMlyQLEuonV0ylnK4_EVqu9GToJzjyJneYhk28hkUrDRgmt66JQRBksMZebjlDOXyTmlJfUc1-OLY";
 
         console.log("🔑 VAPID LENGTH:", vapidKey.length);
 
