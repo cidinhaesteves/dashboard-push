@@ -6,57 +6,38 @@
 </head>
 <body>
 
-<h2>🔔 Ativar Notificações</h2>
+<h1>🔔 Ativar Notificações</h1>
 <button onclick="ativar()">Ativar Notificações</button>
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
+// 🔥 CONFIG FIREBASE
 const firebaseConfig = {
   apiKey: "SUA_API_KEY",
-  authDomain: "SEU_AUTH_DOMAIN",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_BUCKET",
+  authDomain: "SEU_PROJECT.firebaseapp.com",
+  projectId: "SEU_PROJECT",
+  storageBucket: "SEU_PROJECT.appspot.com",
   messagingSenderId: "SEU_SENDER_ID",
   appId: "SEU_APP_ID"
 };
 
+// 🔥 VAPID KEY (MESMA QUE JÁ FUNCIONAVA)
+const VAPID_KEY = "SUA_VAPID_KEY_AQUI";
+
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-const VAPID_KEY = "SUA_VAPID_KEY_AQUI";
-
-async function limparServiceWorkers() {
-  const regs = await navigator.serviceWorker.getRegistrations();
-  for (let reg of regs) {
-    await reg.unregister();
-  }
-  console.log("🧹 SWs removidos");
-}
-
-async function limparPushSubscription() {
-  const reg = await navigator.serviceWorker.getRegistration();
-  if (reg) {
-    const sub = await reg.pushManager.getSubscription();
-    if (sub) {
-      await sub.unsubscribe();
-      console.log("🧹 Subscription removida");
-    }
-  }
-}
-
+// 🚀 FUNÇÃO PRINCIPAL
 window.ativar = async function () {
   try {
-    console.log("🚀 INICIANDO LIMPEZA...");
 
-    await limparPushSubscription();
-    await limparServiceWorkers();
+    console.log("🚀 INICIANDO...");
 
-    console.log("🚀 INICIANDO FLUXO...");
-
+    // 🔥 PEDIR PERMISSÃO
     const permission = await Notification.requestPermission();
-
     if (permission !== "granted") {
       alert("Permissão negada!");
       return;
@@ -64,12 +45,36 @@ window.ativar = async function () {
 
     console.log("✅ PERMISSÃO OK");
 
+    // 🔥 LIMPAR SERVICE WORKERS ANTIGOS
+    console.log("🧹 INICIANDO LIMPEZA...");
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    for (let reg of registrations) {
+      await reg.unregister();
+    }
+    console.log("🧹 SWs removidos");
+
+    // 🔥 REGISTRAR NOVO SW
+    console.log("📦 REGISTRANDO SW...");
     const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
 
-    await navigator.serviceWorker.ready;
+    console.log("✅ SW REGISTRADO");
 
-    console.log("📦 SW PRONTO");
+    // 🔥 AGUARDAR CONTROLE REAL DO SW (CORREÇÃO CRÍTICA)
+    console.log("⏳ AGUARDANDO CONTROLE DO SW...");
 
+    await new Promise((resolve) => {
+      if (navigator.serviceWorker.controller) {
+        resolve();
+      } else {
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          resolve();
+        });
+      }
+    });
+
+    console.log("✅ SW CONTROLANDO A PÁGINA");
+
+    // 🔥 GERAR TOKEN (AGORA SEM ERRO)
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
       serviceWorkerRegistration: registration
@@ -77,33 +82,36 @@ window.ativar = async function () {
 
     console.log("🔥 TOKEN:", token);
 
-    const jwt = localStorage.getItem("token");
-
-    if (!jwt) {
-      alert("Faça login primeiro");
+    if (!token) {
+      alert("Erro ao gerar token");
       return;
     }
 
-    const res = await fetch("https://api-push.onrender.com/save-token", {
+    // 🔥 ENVIAR PARA BACKEND
+    const response = await fetch("https://api-push.onrender.com/save-token", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + jwt
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({ token })
     });
 
-    const data = await res.json();
+    const data = await response.json();
 
-    console.log("💾 SALVO:", data);
+    console.log("📡 SALVO:", data);
 
-    alert("✅ Notificações ativadas!");
+    if (data.success) {
+      alert("✅ Notificações ativadas!");
+    } else {
+      alert("Erro ao salvar token");
+    }
 
-  } catch (err) {
-    console.error("❌ ERRO REAL:", err);
+  } catch (error) {
+    console.error("❌ ERRO REAL:", error);
     alert("Erro ao ativar notificações");
   }
 };
+
 </script>
 
 </body>
