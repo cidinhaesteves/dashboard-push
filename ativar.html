@@ -14,7 +14,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
-    // 🔥 CONFIG NOVA
     const firebaseConfig = {
       apiKey: "AIzaSyBspLYLvDhArpJG7UOcLQcPzjDNzyZrYGE",
       authDomain: "eco-goias.firebaseapp.com",
@@ -28,7 +27,6 @@
     const app = initializeApp(firebaseConfig);
     const messaging = getMessaging(app);
 
-    // ✅ FOREGROUND (ABA ABERTA)
     onMessage(messaging, (payload) => {
       console.log("📩 Mensagem recebida (foreground):", payload);
 
@@ -40,7 +38,8 @@
       }
     });
 
-    async function ativar() {
+    // 🔥 AQUI ESTÁ A CORREÇÃO CRÍTICA
+    window.ativar = async function () {
       try {
         console.log("🚀 INICIANDO...");
 
@@ -70,7 +69,6 @@
 
         console.log("🎯 TOKEN GERADO:", tokenFCM);
 
-        // 🔥 ENVIA TOKEN COM AUTH (CORRIGIDO)
         await fetch("https://api-push.onrender.com/save-token", {
           method: "POST",
           headers: {
@@ -86,7 +84,7 @@
         console.error("❌ ERRO REAL:", err);
         alert("Erro ao ativar notificações");
       }
-    }
+    };
 
   </script>
 
