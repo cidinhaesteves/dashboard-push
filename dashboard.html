@@ -74,5 +74,13 @@
     }
   </script>
 
+  <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/firebase-messaging-sw.js")
+    .then(() => console.log("✅ SW registrado no dashboard"))
+    .catch(err => console.error("❌ SW erro:", err));
+}
+</script>
+
 </body>
 </html>
