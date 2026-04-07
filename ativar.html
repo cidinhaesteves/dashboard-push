@@ -10,20 +10,21 @@
 
   <button onclick="ativar()">Ativar Notificações</button>
 
-  <!-- FIREBASE -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 
   <script>
-    // 🔥 CONFIG FIREBASE
-    firebase.initializeApp({
+    const firebaseConfig = {
       apiKey: "AIzaSyCNQ5SPMtnAbPvC11kYv-t2xEDoc8QuR8A",
       authDomain: "eco-goias.firebaseapp.com",
       projectId: "eco-goias",
       storageBucket: "eco-goias.firebasestorage.app",
       messagingSenderId: "31870091742",
       appId: "1:31870091742:web:2ea58294b93441b47c5d4f"
-    });
+    };
+
+    firebase.initializeApp(firebaseConfig);
 
     async function ativar() {
       try {
@@ -35,22 +36,20 @@
         console.log("✅ PERMISSÃO OK");
 
         const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-        console.log("✅ SW REGISTRADO");
 
-        await new Promise((resolve) => {
-          if (navigator.serviceWorker.controller) {
-            resolve();
-          } else {
-            navigator.serviceWorker.addEventListener("controllerchange", () => resolve());
-          }
-        });
+        await navigator.serviceWorker.ready;
 
-        console.log("✅ SW CONTROLANDO");
+        console.log("✅ SW PRONTO");
 
         const messaging = firebase.messaging();
 
+        // 🔥 VAPID 100% CORRETA (SEM ESPAÇO, SEM QUEBRA)
+        const vapidKey = "BNKbYRqKlo8aNkr-NiLxNbZ5uXDEkXEogxnUfy33DVmzKVvSh2-AO0Sml-S5Abcwpf5ZpGjxcy2x-3d6dD9Y8";
+
+        console.log("🔑 VAPID LENGTH:", vapidKey.length);
+
         const token = await messaging.getToken({
-          vapidKey: "BNKbYRqKlo8aNkr-NiLxNbZ5uXDEkXEogxnUfy33DVmzKVvSh2-AO0Sml-S5Abcwpf5ZpGjxcy2x-3d6dD9Y8",
+          vapidKey: vapidKey,
           serviceWorkerRegistration: registration
         });
 
@@ -58,7 +57,7 @@
 
         if (!token) throw new Error("Token não gerado");
 
-        alert("Token gerado com sucesso!");
+        alert("✅ Token gerado com sucesso!");
 
       } catch (err) {
         console.error("❌ ERRO REAL:", err);
