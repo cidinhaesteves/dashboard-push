@@ -1,40 +1,72 @@
-// 🔥 FORÇA ATIVAÇÃO IMEDIATA DO SERVICE WORKER
-self.addEventListener("install", (event) => {
-  self.skipWaiting();
-});
+import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-// 🔥 FORÇA O SW A CONTROLAR A PÁGINA
-self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
-});
-
-// 🔥 IMPORTS FIREBASE (VERSÃO COMPAT)
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
-
-// 🔥 CONFIG DO SEU FIREBASE (CONFIRMADO PELAS IMAGENS)
-firebase.initializeApp({
+// 🔥 CONFIG FIREBASE
+const firebaseConfig = {
   apiKey: "AIzaSyCNQ5SPMtnAbPvC11kYv-t2xEDoc8QuR8A",
   authDomain: "eco-goias.firebaseapp.com",
   projectId: "eco-goias",
   storageBucket: "eco-goias.firebasestorage.app",
   messagingSenderId: "31870091742",
-  appId: "1:31870091742:web:2ea58294b93441b47c5d4f",
-  measurementId: "G-RJVTG24IK0"
-});
+  appId: "1:31870091742:web:2ea58294b93441b47c5d4f"
+};
 
-// 🔥 INICIALIZA MESSAGING
-const messaging = firebase.messaging();
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
-// 🔥 RECEBER PUSH EM BACKGROUND
-messaging.onBackgroundMessage(function(payload) {
-  console.log("🔥 PUSH RECEBIDO NO SW:", payload);
+// 🔥 SUA VAPID KEY (EXATAMENTE DO FIREBASE)
+const VAPID_KEY = "BNKbYRqKlo8aNkr-NiLxNbZ5uXDEkXEogxnUfy33DVmzKVvSh2-AO0Sml-S5Abcwpf5ZpGjxcy2x-3d6dD9Y8";
 
-  const title = payload.notification?.title || "Notificação";
-  const options = {
-    body: payload.notification?.body || "Você recebeu uma mensagem",
-    icon: "/icon.png"
-  };
+// 🔥 CONVERSÃO CORRETA (ESSENCIAL)
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
 
-  self.registration.showNotification(title, options);
-});
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+// 🔥 FUNÇÃO PRINCIPAL
+export async function gerarToken() {
+  try {
+    console.log("🚀 INICIANDO...");
+
+    const permission = await Notification.requestPermission();
+
+    if (permission !== "granted") {
+      throw new Error("Permissão negada");
+    }
+
+    console.log("✅ PERMISSÃO OK");
+
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    console.log("✅ SW REGISTRADO");
+
+    await navigator.serviceWorker.ready;
+    console.log("✅ SW PRONTO");
+
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: registration
+    });
+
+    if (!token) {
+      throw new Error("Token não gerado");
+    }
+
+    console.log("🔥 TOKEN GERADO:", token);
+
+    return token;
+
+  } catch (error) {
+    console.error("❌ ERRO REAL:", error);
+    throw error;
+  }
+}
