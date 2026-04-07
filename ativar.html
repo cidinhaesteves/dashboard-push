@@ -1,67 +1,69 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
   <meta charset="UTF-8">
   <title>Ativar Notificações</title>
 </head>
 <body>
 
-  <h1>🔔 Ativar Notificações</h1>
+<h2>🔔 Ativar Notificações</h2>
+<button onclick="ativar()">Ativar Notificações</button>
 
-  <button onclick="ativar()">Ativar Notificações</button>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBspLYLvDhArpJG7UOcLQcPzjDNzyZrYGE",
+  authDomain: "eco-goias.firebaseapp.com",
+  projectId: "eco-goias",
+  storageBucket: "eco-goias.firebasestorage.app",
+  messagingSenderId: "31870091742",
+  appId: "1:31870091742:web:35e2d0b7fa5a8fb77c5d4f",
+  measurementId: "G-P37K5DP7Y0"
+};
 
-  <script>
-    firebase.initializeApp({
-      apiKey: "AIzaSyCNQ5SPMtnAbPvC11kYv-t2xEDoc8QuR8A",
-      authDomain: "eco-goias.firebaseapp.com",
-      projectId: "eco-goias",
-      storageBucket: "eco-goias.firebasestorage.app",
-      messagingSenderId: "31870091742",
-      appId: "1:31870091742:web:2ea58294b93441b47c5d4f"
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+
+async function ativar() {
+  try {
+    console.log("🚀 INICIANDO...");
+
+    const permission = await Notification.requestPermission();
+
+    if (permission !== "granted") {
+      alert("Permissão negada");
+      return;
+    }
+
+    console.log("✅ PERMISSÃO OK");
+
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
+    console.log("✅ SW REGISTRADO");
+
+    const token = await getToken(messaging, {
+      vapidKey: "BIumtqPx8aXRJDsTgzxFtYeuAlY9P15oEKngndrZprsFUvpbjaZc1OCqxPGCexXx9-JIP95t0qyqhTus-xTlUGQ",
+      serviceWorkerRegistration: registration
     });
 
-    async function ativar() {
-      try {
-        console.log("🚀 INICIANDO...");
-
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") throw new Error("Permissão negada");
-
-        console.log("✅ PERMISSÃO OK");
-
-        const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-
-        await navigator.serviceWorker.ready;
-
-        console.log("✅ SW PRONTO");
-
-        const messaging = firebase.messaging();
-
-        // 🔥 COLE SUA NOVA VAPID AQUI (87 chars)
-        const vapidKey = "BFbTfVXFfHUMlyQLEuonV0ylnK4_EVqu9GToJzjyJneYhk28hkUrDRgmt66JQRBksMZebjlDOXyTmlJfUc1-OLY";
-
-        console.log("🔑 VAPID LENGTH:", vapidKey.length);
-
-        const token = await messaging.getToken({
-          vapidKey: vapidKey,
-          serviceWorkerRegistration: registration
-        });
-
-        console.log("🔥 TOKEN:", token);
-
-        if (!token) throw new Error("Token não gerado");
-
-        alert("✅ Token gerado com sucesso!");
-
-      } catch (err) {
-        console.error("❌ ERRO REAL:", err);
-        alert("Erro ao ativar notificações");
-      }
+    if (!token) {
+      throw new Error("Token não gerado");
     }
-  </script>
+
+    console.log("🎯 TOKEN GERADO:", token);
+
+    alert("Notificações ativadas com sucesso!");
+
+  } catch (error) {
+    console.error("❌ ERRO REAL:", error);
+    alert("Erro ao ativar notificações");
+  }
+}
+
+window.ativar = ativar;
+</script>
 
 </body>
 </html>
