@@ -14,7 +14,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
-    // 🔥 CONFIG NOVA (SEU APP ATUAL)
+    // 🔥 CONFIG NOVA
     const firebaseConfig = {
       apiKey: "AIzaSyBspLYLvDhArpJG7UOcLQcPzjDNzyZrYGE",
       authDomain: "eco-goias.firebaseapp.com",
@@ -28,7 +28,7 @@
     const app = initializeApp(firebaseConfig);
     const messaging = getMessaging(app);
 
-    // ✅ RECEBER PUSH COM ABA ABERTA (FOREGROUND)
+    // ✅ FOREGROUND (ABA ABERTA)
     onMessage(messaging, (payload) => {
       console.log("📩 Mensagem recebida (foreground):", payload);
 
@@ -58,25 +58,26 @@
         const vapidKey = "BIumtqPx8aXRJDsTgzxFtYeuAlY9P15oEKngndrZprsFUvpbjaZc1OCqxPGCexXx9-JIP95t0qyqhTus-xTlUGQ";
         console.log("🔑 VAPID LENGTH:", vapidKey.length);
 
-        const token = await getToken(messaging, {
+        const tokenFCM = await getToken(messaging, {
           vapidKey: vapidKey,
           serviceWorkerRegistration: registration
         });
 
-        if (!token) {
+        if (!tokenFCM) {
           alert("Erro ao gerar token");
           return;
         }
 
-        console.log("🎯 TOKEN GERADO:", token);
+        console.log("🎯 TOKEN GERADO:", tokenFCM);
 
-        // 🔥 ENVIA TOKEN PARA SEU BACKEND
-        await fetch("https://SEU-BACKEND-AQUI/salvar-token", {
+        // 🔥 ENVIA TOKEN COM AUTH (CORRIGIDO)
+        await fetch("https://api-push.onrender.com/save-token", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("token")
           },
-          body: JSON.stringify({ token })
+          body: JSON.stringify({ token: tokenFCM })
         });
 
         alert("Notificações ativadas com sucesso!");
