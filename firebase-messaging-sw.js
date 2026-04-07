@@ -1,8 +1,8 @@
-// 🔥 IMPORTS CORRETOS PARA SERVICE WORKER
+// 🔥 IMPORTS (COMPAT - OBRIGATÓRIO)
 importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js");
 
-// 🔥 CONFIG FIREBASE
+// 🔥 FIREBASE CONFIG
 firebase.initializeApp({
   apiKey: "AIzaSyCNQ5SPMtnAbPvC11kYv-t2xEDoc8QuR8A",
   authDomain: "eco-goias.firebaseapp.com",
@@ -12,16 +12,26 @@ firebase.initializeApp({
   appId: "1:31870091742:web:2ea58294b93441b47c5d4f"
 });
 
-// 🔥 INICIALIZA MESSAGING
 const messaging = firebase.messaging();
 
-// 🔥 RECEBER PUSH EM BACKGROUND
+// 🚀 FORÇA ATIVAÇÃO IMEDIATA
+self.addEventListener("install", (event) => {
+  console.log("🔥 SW INSTALANDO...");
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  console.log("🔥 SW ATIVANDO...");
+  event.waitUntil(self.clients.claim());
+});
+
+// 🔥 RECEBER PUSH
 messaging.onBackgroundMessage(function (payload) {
-  console.log("🔥 PUSH RECEBIDO (SW):", payload);
+  console.log("🔥 PUSH RECEBIDO:", payload);
 
   const notificationTitle = payload.notification?.title || "Nova notificação";
   const notificationOptions = {
-    body: payload.notification?.body || "Você recebeu uma mensagem",
+    body: payload.notification?.body || "Mensagem recebida",
     icon: "/icon.png"
   };
 
